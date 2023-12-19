@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c72b32b187775ba4489a400915428637, type: 3}
+  m_Name: HpPotion
+  m_EditorClassIdentifier: 
+  width: 1
+  height: 2
+  itemName: HpPotion
+  itemIcon: {fileID: 21300000, guid: d18aac935d16e4b4d963c5adf5e0c0c2, type: 3}
+  itemModelingForDropping: {fileID: 4423662366679264837, guid: 1d4ac1b215140d247870fdd5c072cb3a, type: 3}
+  itemModelingForEquipment: {fileID: 0}
+  groundYOffset: 0.292
