@@ -12,6 +12,7 @@ public class QuestAgent : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             QuestManager.Instance.SendMessage("AddQuestInPlayerQuestDictionary", questName, SendMessageOptions.DontRequireReceiver);
+            Destroy(gameObject);
         }
     }
 }

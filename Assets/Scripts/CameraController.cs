@@ -14,8 +14,6 @@ public class CameraController : MonoBehaviour
         Move
     }
 
-    
-
     private CamMoveState camMoveState;
     
     [SerializeField]private CinemachineFreeLook freeLookCamera;

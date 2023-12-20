@@ -11,6 +11,7 @@ public class QuestGoal : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             QuestManager.Instance.SendMessage("CompleteQuest", questName, SendMessageOptions.DontRequireReceiver);
+            Destroy(gameObject);
         }
     }
 }

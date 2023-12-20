@@ -55,7 +55,7 @@ public class QuestManager : MonoBehaviour
         textBox.gameObject.SetActive(false);
 
         currentQuestName = "";
-        textIndex = 0;
+        textIndex = -1;
         
         AddQuestInData();
     }
@@ -65,7 +65,6 @@ public class QuestManager : MonoBehaviour
         if (currentQuestName != "")
         {
             InteractWithQuestText(currentQuestName);
-            textIndex++;
         }
     }
     
@@ -83,11 +82,11 @@ public class QuestManager : MonoBehaviour
         // 퀘스트 내용 버퍼 삭제
         questScript.Clear();
         
-        questScript.Add(0, "튜토리얼 퀘스트2 대사 1번입니다.");
-        questScript.Add(1, "튜토리얼 퀘스트2 대사 2번입니다.");
-        questScript.Add(2, "튜토리얼 퀘스트2 대사 3번입니다.");
+        questScript.Add(0, "튜토리얼 퀘스트 완료 대사 1번입니다.");
+        questScript.Add(1, "튜토리얼 퀘스트 완료 대사 2번입니다.");
+        questScript.Add(2, "튜토리얼 퀘스트 완료 대사 3번입니다.");
         
-        questDictionary.Add("튜토리얼 퀘스트2", new Dictionary<int, string>(questScript));
+        questDictionary.Add("튜토리얼 퀘스트완료", new Dictionary<int, string>(questScript));
         
         questScript.Clear();
         
@@ -118,8 +117,12 @@ public class QuestManager : MonoBehaviour
                 if (playerQuestDictionary.ContainsKey(questName)) return;
                 if (completedQuest.Contains(questName)) return;
                 
-                playerQuestDictionary.Add(quest.Key, quest.Value);
+                playerQuestDictionary.Add(questName, quest.Value);
+                playerQuestDictionary.Add(questName + "완료", questDictionary[questName + "완료"]);
+
                 Debug.Log("추가된 Quest : " + questName);
+                Debug.Log("추가된 Quest : " + questName + "완료");
+
                 currentQuestName = questName;
                 break;
             }
@@ -127,6 +130,7 @@ public class QuestManager : MonoBehaviour
         
         textLetterBox.SetActive(true);
         Time.timeScale = 0.0f;
+
     }
 
     void CompleteQuest(string acceptedQuestName)
@@ -139,31 +143,49 @@ public class QuestManager : MonoBehaviour
                 if (playerQuestDictionary.ContainsKey(questName) == false) return;
                 
                 playerQuestDictionary.Remove(questName);
+                playerQuestDictionary.Remove(questName + "완료");
+
                 completedQuest.Add(questName);
+                completedQuest.Add(questName + "완료");
+                
                 Debug.Log("삭제된 Quest : " + questName);
+                Debug.Log("삭제된 Quest : " + questName + "완료");
+                
+                currentQuestName = questName + "완료";
                 break;
             }
         }
+        
+        textLetterBox.SetActive(true);
+        Time.timeScale = 0.0f;
     }
 
     void InteractWithQuestText(string acceptedQuestName)
     {
-        Time.timeScale = 0.0f;
         textBox.gameObject.SetActive(true);
 
-        var scripts = playerQuestDictionary[acceptedQuestName];
+        var scripts = questDictionary[acceptedQuestName];
 
         if (textIndex == scripts.Count)
         {
             currentQuestName = "";
-            textIndex = 0;
+            textIndex = -2;
             textBox.gameObject.SetActive(false);
             textLetterBox.SetActive(false);
             Time.timeScale = 1.0f;
         }
         
+        // 퀘스트 이름 출력
+        else if (textIndex == -1)
+        {
+            textBox.text = acceptedQuestName;
+        }
+        
+        // 퀘스트 대사 출력
         else      
             textBox.text = scripts[textIndex];
 
+        
+        textIndex++;
     }
 }
