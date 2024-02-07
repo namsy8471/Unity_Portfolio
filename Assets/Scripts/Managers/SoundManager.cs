@@ -2,58 +2,64 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
+using Random = UnityEngine.Random;
 
-public class SoundManager : MonoBehaviour
+public class SoundManager
 {
-    private AudioSource audioSource;
-    private Dictionary<string, AudioClip> soundFile;
-    
-    private void Awake()
+    private Dictionary<string, AudioClip> _soundFiles;
+    private Dictionary<string, int> _count;
+    public void Init()
     {
-        soundFile = new Dictionary<string, AudioClip>();
+        _soundFiles = new Dictionary<string, AudioClip>();
+        _count = new Dictionary<string, int>();
         
         AddWalkSound();
     }
 
-    private void Start()
-    {
-        audioSource = GetComponent<AudioSource>();
-    }
-
     private void AddWalkSound()
     {
-        for (int i = 1; i <= 10; i++)
-        {
-            soundFile.Add("Walk" + i, Resources.Load<AudioClip>("Sound/S_Stone_Mono_" + i));
-            
-            bool result = soundFile.TryGetValue("Walk"+ i, out AudioClip sound);
-            if (!result)
-            {
-                Debug.Log("Walk" + i + " Key Sound File is not Found!");
-                return;
-            }
-        }
-
-        foreach (var key in soundFile.Keys)
-        {
-            Debug.Log(key + " is added in Audio Dictionary!");
-        }
+        for (int i = 1; i <= 10; i++) AddSoundFile("Walk/Walk");
     }
-    
-    public void PlaySound(string keyWord)
+
+    private AudioClip AddSoundFile(string path)
     {
-        bool result = soundFile[keyWord];
-        if (!result)
+        int index = path.IndexOf('/');
+        string newPath = path.Substring(index + 1);
+        
+        if (_soundFiles.ContainsKey(newPath)) return _soundFiles[path];
+        if (_count.ContainsKey(newPath) == false) _count[newPath] = 1;
+        
+        _soundFiles.Add(newPath + _count[newPath], Resources.Load<AudioClip>("Sound/" + path + _count[newPath]));
+        _soundFiles.TryGetValue(newPath + _count[newPath], out AudioClip sound);
+        
+        if (sound == null)
         {
-            Debug.Log(keyWord + " Key Sound File is not Found!");
-            return;
-        }
-        else
-        {
-            audioSource.clip = soundFile[keyWord];
+            Debug.Log(newPath + _count[newPath] + " Key Sound File is not Found!");
+            return sound;
         }
         
-        // Debug.Log(keyWord + " Sound is playing!");
+        Debug.Log(newPath + _count[newPath] + " is added in Audio Dictionary!");
+        _count[newPath]++;
+        
+        return sound;
+    }
+    
+    public void PlaySound(GameObject obj,string keyWord)
+    {
+        int index = Random.Range(1, _count[keyWord]);
+        
+        _soundFiles.TryGetValue(keyWord + index, out AudioClip clip);
+        
+        if (clip == null)
+        {
+            Debug.Log(keyWord + index +" Key Sound File is not Found!");
+            return;
+        }
+
+        AudioSource audioSource = obj.GetOrAddComponent<AudioSource>();
+        audioSource.clip = clip;
+        
         audioSource.Play();
     }
 }

@@ -89,8 +89,6 @@ public class QuestManager : MonoBehaviour
         questDictionary.Add("튜토리얼 퀘스트완료", new Dictionary<int, string>(questScript));
         
         questScript.Clear();
-        
-        Debug.Log(currentQuestName);
 
         foreach (var quest in playerQuestDictionary)
         {

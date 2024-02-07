@@ -31,7 +31,12 @@ public class EnemyGetDamageState : MonoBehaviour, IStateBase
         getDelayTime = 0.8f;
         downDelayTime = 2.6f;
     }
-    
+
+    public void Init()
+    {
+        throw new System.NotImplementedException();
+    }
+
     public void StartState()
     {
         // Debug.Log("GetDamage State Start");

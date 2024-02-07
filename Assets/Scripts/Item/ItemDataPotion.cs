@@ -10,13 +10,13 @@ public class ItemDataPotion : ItemData
     private InventoryController inventoryController;
     public override void Init()
     {
-        inventoryController = FindObjectOfType(typeof(InventoryController)) as InventoryController;
+        inventoryController = Managers.Game.InventoryController;
     }
 
     public override void UseItem()
     {
         Debug.Log("HP 회복!");
-        inventoryController.SendMessage("DeleteItemInHighlight", SendMessageOptions.DontRequireReceiver);
+        inventoryController.DeleteItemInHighlight();
     }
 
     public override void DropItem()

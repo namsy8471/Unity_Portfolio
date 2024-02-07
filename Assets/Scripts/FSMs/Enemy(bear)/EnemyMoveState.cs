@@ -61,7 +61,12 @@ public class EnemyMoveState : MonoBehaviour, IStateBase
         patrolDone = false;
         isFindPlayer = false;
     }
-    
+
+    public void Init()
+    {
+        throw new NotImplementedException();
+    }
+
     public void StartState()
     {
         // Debug.Log("Enemy Move State Update");

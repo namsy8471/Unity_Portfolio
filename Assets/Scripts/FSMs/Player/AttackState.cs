@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AttackState : MonoBehaviour, IStateBase
+public class AttackState : IStateBase
 {
     private enum AtkState
     {
@@ -14,24 +14,22 @@ public class AttackState : MonoBehaviour, IStateBase
         AtkFinish
     }
 
-    private AtkState atkState;
+    private AtkState _atkState;
     
-    [SerializeField]private float attackRange;
-    [SerializeField]private float attackCooldown;
-    [SerializeField]private float lastAttackCooldown;
+    private float attackRange;
+    private float attackCooldown;
+    private float lastAttackCooldown;
     private float attackTimer;
 
     private float downGauge;
     
-    private TargetingSystem targetingSystem;
     private Animator animator;
-    
-    private void Start()
-    {
-        atkState = AtkState.Idle;
-        animator = GetComponentInChildren<Animator>();
-        targetingSystem = GetComponent<TargetingSystem>();
 
+    public void Init()
+    {
+        _atkState = AtkState.Idle;
+        animator = Managers.Game.Player.GetComponentInChildren<Animator>();
+        
         downGauge = 34;
         
         attackRange = 3.0f;
@@ -57,11 +55,11 @@ public class AttackState : MonoBehaviour, IStateBase
         if(attackTimer >= 2)
             ChangeState(AtkState.AtkFinish);
         
-        switch (atkState)
+        switch (_atkState)
         {
             case AtkState.Idle:
                 
-                if (Input.GetMouseButtonDown(0) && !targetingSystem.GetCurrentTarget().GetComponent<EnemyGetDamageState>().IsInvincible())
+                if (Input.GetMouseButtonDown(0) && !Managers.Game.TargetingSystem.GetCurrentTarget().GetComponent<EnemyGetDamageState>().IsInvincible())
                 {
                     ChangeState(AtkState.Atk1);
                     break;
@@ -102,17 +100,17 @@ public class AttackState : MonoBehaviour, IStateBase
     public void EndState()
     {
         // Debug.Log("Attack State End!");
-        atkState = AtkState.Idle;
+        _atkState = AtkState.Idle;
     }
     
     private void Attack()
     {
-        targetingSystem.GetCurrentTarget().SendMessage("GetDamage", downGauge, SendMessageOptions.DontRequireReceiver);
+        Managers.Game.TargetingSystem.GetCurrentTarget().SendMessage("GetDamage", downGauge, SendMessageOptions.DontRequireReceiver);
     }
 
     private void ChangeState(AtkState state)
     {
-        switch (atkState)
+        switch (_atkState)
         {
             case AtkState.Idle:
                 break;
@@ -126,10 +124,10 @@ public class AttackState : MonoBehaviour, IStateBase
                 break;
         }
 
-        atkState = state;
+        _atkState = state;
         attackTimer = 0;
         
-        switch (atkState)
+        switch (_atkState)
         {
             case AtkState.Idle:
                 break;
@@ -146,7 +144,7 @@ public class AttackState : MonoBehaviour, IStateBase
                 Attack();
                 break;
             case AtkState.AtkFinish:
-                gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
+                Managers.Game.Player.gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
                 break;
             default:
                 break;

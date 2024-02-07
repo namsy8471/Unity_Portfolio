@@ -50,6 +50,11 @@ public class EnemyAttackState : MonoBehaviour, IStateBase
         player = GameObject.FindGameObjectWithTag("Player");
     }
 
+    public void Init()
+    {
+        throw new NotImplementedException();
+    }
+
     public void StartState()
     {
         // Debug.Log("Enemy Attack State Start!");

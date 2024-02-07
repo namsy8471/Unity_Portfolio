@@ -388,16 +388,16 @@ ModelImporter:
       curves: []
       events:
       - time: 0.15337422
-        functionName: FootstepSound
+        functionName: PlaySound
         data: Walk
-        objectReferenceParameter: {fileID: 11500000, guid: 84caa6c0a15340540ba31876a9ccea13, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: ab359d914f335c9499d72034a53499b0, type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
       - time: 0.65030676
-        functionName: FootstepSound
+        functionName: PlaySound
         data: Walk
-        objectReferenceParameter: {fileID: 11500000, guid: 84caa6c0a15340540ba31876a9ccea13, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: ab359d914f335c9499d72034a53499b0, type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0

@@ -11,6 +11,11 @@ public class EnemyIdleState : MonoBehaviour, IStateBase
         animator = GetComponentInChildren<Animator>();
     }
 
+    public void Init()
+    {
+        throw new System.NotImplementedException();
+    }
+
     public void StartState()
     {
         // Debug.Log("Enemy Idle Start");

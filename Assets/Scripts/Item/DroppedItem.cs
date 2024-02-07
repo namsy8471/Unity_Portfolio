@@ -1,15 +1,10 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class DroppedItem : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class DroppedItem : MonoBehaviour, IPointerClickHandler
 {
-    private static Action _changeCursorForGrab;
-    private static Action _changeCursorForGrabbing;
-    private static Action _changeCursorForNormal;
+    
     
     [SerializeField] private ItemData itemData;
     public ItemData ItemData
@@ -25,7 +20,7 @@ public class DroppedItem : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
     
     private void Start()
     {
-        inventoryController = FindObjectOfType(typeof(InventoryController)) as InventoryController;
+        inventoryController = Managers.Game.InventoryController;
         itemNameText = GetComponentInChildren<TextMesh>();
         
         itemNameText.text = itemData.ItemName;
@@ -34,14 +29,13 @@ public class DroppedItem : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
 
     private void Update()
     {
-        Transform tr = itemNameText.transform;
-        tr.rotation = Quaternion.LookRotation( tr.position - Camera.main.transform.position );
+        itemNameText.transform.rotation = Camera.main.transform.rotation;
     }
     
-    void RootingThisItem()
+    void LootingThisItem()
     {
         if(inventoryController.SelectedItem != null) return;
-        inventoryController.SendMessage("RootingItem", itemData.ItemName, SendMessageOptions.DontRequireReceiver);
+        inventoryController.LootingItem(itemData.ItemName);
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -49,48 +43,34 @@ public class DroppedItem : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
         if(inventoryController.SelectedItem != null) return;
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            _changeCursorForGrabbing();
+            //_changeCursorForGrabbing?.Invoke();
             
-            if (Vector3.Distance(GameObject.Find("Player").transform.position, transform.position) > 1.0f)
+            if (Vector3.Distance(Managers.Game.Player.transform.position, transform.position) > 1.0f)
             {
                 isSelected = true;
             }
             else
             {
-                RootingThisItem();
+                LootingThisItem();
                 Destroy(gameObject);
-                _changeCursorForNormal();
+                //_changeCursorForNormal();
             }
         }
     }
 
     private void OnTriggerStay(Collider other)
     {
+        Debug.Log("트리거 들어옴");
         if(inventoryController.SelectedItem != null) return;
+        Debug.Log("인벤토리 컨트롤러 selectedItem != null");
+
         if (isSelected && other.CompareTag("Player"))
         {
-            RootingThisItem();
+            LootingThisItem();
             Destroy(gameObject);
-            _changeCursorForNormal();
+           // _changeCursorForNormal?.Invoke();
         }
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        if(inventoryController.SelectedItem != null) return;
-        _changeCursorForGrab();
-    }
 
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        if(inventoryController.SelectedItem != null) return;
-        _changeCursorForNormal();
-    }
-
-    public void RegisterHandler(Action grab, Action grabbing, Action backToNormal)
-    {
-        _changeCursorForGrab = grab;
-        _changeCursorForGrabbing = grabbing;
-        _changeCursorForNormal = backToNormal;
-    }
 }

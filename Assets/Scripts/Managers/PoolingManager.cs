@@ -4,9 +4,7 @@ using UnityEngine;
 
 public class PoolingManager : MonoBehaviour
 {
-    private GameObject[] prefabs;
-
-    private List<GameObject>[] pools;
+    private List<GameObject> pools;
     // Start is called before the first frame update
     // void Awake()
     // {

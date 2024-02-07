@@ -1,11 +1,8 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.Video;
 using Random = UnityEngine.Random;
 
-public class GetDamageState : MonoBehaviour, IStateBase
+public class GetDamageState : IStateBase
 {
     private enum KnockDownState
     {
@@ -24,10 +21,10 @@ public class GetDamageState : MonoBehaviour, IStateBase
     private Animator animator;
     private Rigidbody rb;
     
-    private void Start()
+    public void Init()
     {
-        animator = GetComponentInChildren<Animator>();
-        rb = GetComponent<Rigidbody>();
+        animator = Managers.Game.Player.GetComponentInChildren<Animator>();
+        rb = Managers.Game.Player.GetComponent<Rigidbody>();
         
         downGauge = 0.0f;
 
@@ -64,7 +61,7 @@ public class GetDamageState : MonoBehaviour, IStateBase
 
                 if (timer >= getDelayTime)
                 {
-                    gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
+                    Managers.Game.Player.gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
                     break;
                 }
                 break;
@@ -72,7 +69,7 @@ public class GetDamageState : MonoBehaviour, IStateBase
                 
                 if (timer >= downDelayTime)
                 {
-                    gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
+                    Managers.Game.Player.gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
                     break;
                 }
                 break;
@@ -124,7 +121,7 @@ public class GetDamageState : MonoBehaviour, IStateBase
 
     private void InvincibleTime()
     {
-        Collider[] colliders = Physics.OverlapSphere(transform.position, 10, 1 << LayerMask.NameToLayer("Enemy"));
+        Collider[] colliders = Physics.OverlapSphere(Managers.Game.Player.transform.position, 10, 1 << LayerMask.NameToLayer("Enemy"));
         foreach (var col in colliders)
         {
             col.gameObject.SendMessage("AttackFinish", SendMessageOptions.DontRequireReceiver);

@@ -1,15 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 
-public class TargetingSystem : MonoBehaviour
+public class TargetingSystem
 {
 
     private enum TargetState
@@ -23,51 +17,59 @@ public class TargetingSystem : MonoBehaviour
     private static Action _changeCursorForBattle;
     private static Action _changeCursorForNormal;
 
-    public delegate void ChangeCursorForBattle();
-
     // 타게팅 시스템 관련
     private Camera cam;
-    [SerializeField]private  LayerMask targetLayer;
-    [SerializeField]private float targetRadius = 50.0f; // 마우스 히트 포인트에서 타게팅이 가능한 범위
-    private LineRenderer lineRenderer;          // 마우스와 적이 이어지는 라인 그리기
-    private Vector3 mouseTargetPos;          // 히트 포인트 저장 백터
-    [SerializeField]private GameObject currentTarget;
+    
+    private LayerMask targetLayer;
+    private float targetRadius = 50.0f; // 마우스 히트 포인트에서 타게팅이 가능한 범위
+    
+    private LineRenderer _lineRenderer;          // 마우스와 적이 이어지는 라인 그리기
+    private Vector3 _mouseTargetPos;          // 히트 포인트 저장 백터
+    private GameObject _target;
     
     /// 타게팅 원 이미지 관련
-    [SerializeField]private Image circleImage;
-    private float circleSize = 50f;
-    private RectTransform circleRectTransform;
+    private Image _circleImage;
+    private float _circleSize = 50f;
+    private RectTransform _circleRectTransform;
 
-    private  float rotationOffset = 0;           // 원 회전 오프셋
+    private float _rotationOffset = 0;           // 원 회전 오프셋
     ////////////////
 
-    private TargetState targetState;
+    private TargetState _targetState;
     
-    private void Start()
+    public GameObject Target
     {
-        circleRectTransform = circleImage.rectTransform;
+        get => _target;
+        set => _target = value;
+    }
+    
+    public void Init()
+    {
+        _circleImage = Resources.Load<Image>("Images/TargetingCircle");
+        if(_circleImage != null) _circleRectTransform = _circleImage.rectTransform;
+
+        _changeCursorForBattle += Managers.Cursor.ChangeCursorForBattle;
+        _changeCursorForNormal += Managers.Cursor.BackNormalCursor;
         
-        lineRenderer = gameObject.GetComponent<LineRenderer>();
+        _lineRenderer = Managers.Game.Player.GetComponent<LineRenderer>();
         
-        lineRenderer.startColor = Color.cyan;
-        lineRenderer.endColor = Color.cyan;
-        lineRenderer.startWidth = 0.05f;
-        lineRenderer.endWidth = 0.05f;
+        _lineRenderer.startColor = Color.cyan;
+        _lineRenderer.endColor = Color.cyan;
+        _lineRenderer.startWidth = 0.05f;
+        _lineRenderer.endWidth = 0.05f;
         
         cam = Camera.main;
-        
     }
 
-    // Update is called once per frame
-    private void Update()
+    public void Update()
     {
-        switch (targetState)
+        switch (_targetState)
         {
             case TargetState.Idle:
                 
                 if (Input.GetKey(KeyCode.LeftControl))
                 {
-                    targetState = TargetState.TargetingStart;
+                    _targetState = TargetState.TargetingStart;
                     break;
                 }
                 break;
@@ -75,15 +77,14 @@ public class TargetingSystem : MonoBehaviour
             case TargetState.TargetingStart:
                 
                 FindEnemy();
-                targetState = TargetState.Targeting;
+                _targetState = TargetState.Targeting;
                 
                 break;
             
             case TargetState.Targeting:
                 if (Input.GetKeyUp(KeyCode.LeftControl))
                 {
-                    ClearTarget();
-                    targetState = TargetState.Idle;
+                    _targetState = TargetState.Idle;
                     break;
                 }
                 
@@ -102,10 +103,10 @@ public class TargetingSystem : MonoBehaviour
         RaycastHit hit;
         
         if (Physics.Raycast(ray, out hit, 1000f, 1 << LayerMask.NameToLayer("Ground")))
-            mouseTargetPos = hit.point;
+            _mouseTargetPos = hit.point;
         
         // 적 타겟 찾기
-        Collider[] colliders = Physics.OverlapSphere(mouseTargetPos, targetRadius, targetLayer);
+        Collider[] colliders = Physics.OverlapSphere(_mouseTargetPos, targetRadius, targetLayer);
         
         if (colliders.Length > 0)
         {
@@ -114,11 +115,11 @@ public class TargetingSystem : MonoBehaviour
 
             foreach (Collider collider in colliders)
             {
-                var distance = Vector3.Distance(mouseTargetPos, collider.transform.position);
+                var distance = Vector3.Distance(_mouseTargetPos, collider.transform.position);
 
                 if (distance < closestDistance)
                 {
-                    currentTarget = collider.gameObject;
+                    _target = collider.gameObject;
                     closestDistance = distance;
                 }
             }
@@ -127,17 +128,19 @@ public class TargetingSystem : MonoBehaviour
 
     private void ClearTarget()
     {
-        currentTarget = null;
-        lineRenderer.positionCount = 0;
-        circleImage.gameObject.SetActive(false);
-        _changeCursorForNormal();
+        _target = null;
+        _lineRenderer.positionCount = 0;
+        _circleImage.gameObject.SetActive(false);
+        
+        _changeCursorForNormal?.Invoke();
     }
 
     private void TargetEnemy()
     {
-        DrawCircleToEnemy(currentTarget.transform.position);
+        DrawCircleToEnemy(_target.transform.position);
         UpdateTargetIndicator();
-        _changeCursorForBattle();
+        
+        _changeCursorForBattle?.Invoke();
     }
 
     private void UpdateTargetIndicator()
@@ -147,50 +150,42 @@ public class TargetingSystem : MonoBehaviour
         RaycastHit hit;
         
         if (Physics.Raycast(ray, out hit, 1000f, 1 << LayerMask.NameToLayer("Ground")))
-            mouseTargetPos = hit.point;
+            _mouseTargetPos = hit.point;
         
-        Vector3 targetPosition = currentTarget.transform.position;
+        Vector3 targetPosition = _target.transform.position;
 
-        lineRenderer.positionCount = 2;
-        lineRenderer.SetPosition(0, mouseTargetPos);
-        lineRenderer.SetPosition(1, targetPosition);
+        _lineRenderer.positionCount = 2;
+        _lineRenderer.SetPosition(0, _mouseTargetPos);
+        _lineRenderer.SetPosition(1, targetPosition);
     }
 
     private void DrawCircleToEnemy(Vector3 currentTargetPos)
     {
-        circleImage.gameObject.SetActive(true);
+        _circleImage.gameObject.SetActive(true);
         Vector3 screenPos = cam.WorldToScreenPoint(currentTargetPos);
 
         // 타겟팅 원의 위치 업데이트
-        circleRectTransform.position = screenPos;
+        _circleRectTransform.position = screenPos;
 
         // 타겟팅 원 회전
-        rotationOffset += 1;
-        circleImage.gameObject.transform.rotation = Quaternion.Euler(0, 0, rotationOffset);
+        _rotationOffset += 1;
+        _circleImage.gameObject.transform.rotation = Quaternion.Euler(0, 0, _rotationOffset);
         
         // 타겟팅 카메라 거리에 따른 원 크기 조절
-        float dist = (currentTarget.transform.position - cam.transform.position).magnitude;
-        float scaleFactor = circleSize / dist;
-        circleRectTransform.localScale = new Vector3(scaleFactor, scaleFactor, 1.0f);
+        float dist = (_target.transform.position - cam.transform.position).magnitude;
+        float scaleFactor = _circleSize / dist;
+        _circleRectTransform.localScale = new Vector3(scaleFactor, scaleFactor, 1.0f);
     }
 
     public bool IsCurrentTargetExist()
     {
-        return currentTarget;
+        return _target;
     }
-    public Vector3 GetCurrentTargetPos()
-    {
-        return currentTarget.transform.position;
-    }
+    
     
     public GameObject GetCurrentTarget()
     {
-        return currentTarget;
+        return _target;
     }
 
-    public void RegisterHandler(Action battleCursor, Action backToNormalCursor)
-    {
-        _changeCursorForBattle = battleCursor;
-        _changeCursorForNormal = backToNormalCursor;
-    }
 }

@@ -195,7 +195,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4423662367792711681}
-  m_Text: Backack
+  m_Text: Backpack
   m_OffsetZ: 0
   m_CharacterSize: 0.2
   m_LineSpacing: 1

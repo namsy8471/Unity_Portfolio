@@ -1,11 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using Random = UnityEngine.Random;
+using UnityEngine.EventSystems;
 
-public class MoveState : MonoBehaviour, IStateBase
+
+public class MoveState : IStateBase
 {
     // FSM 상태 관련
     enum InputType
@@ -22,105 +20,96 @@ public class MoveState : MonoBehaviour, IStateBase
         Finish
     }
     
-    enum WalkState
+    enum WalkStyle
     {
         Walk,
         Run
     }
 
-    private InputType inputType;
-    private MouseState mouseState;
-    private WalkState walkState;
+    private InputType _inputType;
+    private MouseState _mouseState;
+    private WalkStyle _walkStyle;
     
     // Moving parameter 움직임과 관련된 변수들 ////////////////
     /////////////////////////////////////////////////////////
-
-    [SerializeField]private float movingSpeed = 200;
-    [SerializeField]private float walkSpeedOffset = 200f;
-    [SerializeField]private float runSpeedOffset = 400f;
     
-    private float moveHorizontal;
-    private float moveVertical;
-    
-    private Vector3 targetPosition; // 목표 위치 (마우스 좌클릭)
-    private Rigidbody rb;          // 리지드바디
+    private float _moveHorizontal;
+    private float _moveVertical;
 
-    private bool isMoveDone;        // 이동 종료?
-    private Camera mainCam;
+    private GameObject _player;
+    private Vector3 _targetPosition; // 목표 위치
+    private Rigidbody _rb;          // 리지드바디
 
-    private bool isMouseOnInventory;
+    private bool _isMoveDone;        // 이동 종료?
+    private Camera _mainCam;
+
     ///////////////////////////////////////////////////////////
 
-    // 마우스 클릭 프리팹용 파티클 매니저
-    private ParticleManager particleManager;
-    private TargetingSystem targetingSystem;
-    private Animator animator;
-    
-    private void Start()
-    {
-        particleManager = GameObject.Find("ParticleManager").GetComponent<ParticleManager>();
-        targetingSystem = GetComponent<TargetingSystem>();
-        animator = GetComponentInChildren<Animator>();
-        rb = GetComponent<Rigidbody>();
-        mainCam = Camera.main;
+    private TargetingSystem _targetingSystem;
+    private Animator _animator;
 
+
+    public void Init()
+    {
+        _player = Managers.Game.Player;
         
-        isMoveDone = false;
-        isMouseOnInventory = false;
+        _animator = _player.GetComponentInChildren<Animator>();
+        _rb = _player.GetComponent<Rigidbody>();
+        _targetingSystem = Managers.Game.TargetingSystem;
+        
+        _mainCam = Camera.main;
     }
     
     public void StartState()
     {
-        // Debug.Log("Move State Start!");
-        inputType = InputType.Start;
-        
+        _inputType = InputType.Start;
+
         if (Input.GetKey(KeyCode.LeftShift))
-            ChangeState(WalkState.Walk);
+            ChangeState(WalkStyle.Walk);
         else
-            ChangeState(WalkState.Run);
+            ChangeState(WalkStyle.Run);
         
-        isMoveDone = false;
+        _isMoveDone = false;
     }
 
     public void UpdateState()
     {
-        // Debug.Log("Move State Update!");
         
         // 키보드로 움직이는 방식
-        moveHorizontal = Input.GetAxisRaw("Horizontal");
-        moveVertical = Input.GetAxisRaw("Vertical");
+        _moveHorizontal = Input.GetAxisRaw("Horizontal");
+        _moveVertical = Input.GetAxisRaw("Vertical");
         
-        switch (inputType)
+        switch (_inputType)
         {
             case InputType.Start:
-                if (moveVertical != 0 || moveHorizontal != 0)
+                if (_moveVertical != 0 || _moveHorizontal != 0)
                 {
-                    inputType = InputType.KeyBoard;
+                    _inputType = InputType.KeyBoard;
                     break;
                 }
                 
                 if (Input.GetMouseButton(0))
                 {
-                    inputType = InputType.Mouse;
-                    mouseState = MouseState.Clicked;
+                    _inputType = InputType.Mouse;
+                    _mouseState = MouseState.Clicked;
                     break;
                 }
 
-                isMoveDone = true;
+                _isMoveDone = true;
                 break;
             
             case InputType.KeyBoard:
 
                 if (Input.GetMouseButton(0))
                 {
-                    inputType = InputType.Mouse;
-                    mouseState = MouseState.Clicked;
+                    _inputType = InputType.Mouse;
+                    _mouseState = MouseState.Clicked;
                     break;
                 }
 
-                if (moveVertical == 0 && moveHorizontal == 0)
+                if (_moveVertical == 0 && _moveHorizontal == 0)
                 {
-                    isMoveDone = true;
+                    _isMoveDone = true;
                     break;
                 }
                 
@@ -131,44 +120,38 @@ public class MoveState : MonoBehaviour, IStateBase
             case InputType.Mouse:
             {
                 // Mouse 상태일 때 키보드 입력이 감지되면 마우스 이동으로 변경
-                if (moveVertical != 0 || moveHorizontal != 0)
+                if (_moveVertical != 0 || _moveHorizontal != 0)
                 {
-                    inputType = InputType.KeyBoard;
-                    break;
-                }
-                
-                if (isMouseOnInventory && rb.velocity == Vector3.zero)
-                {
-                    isMoveDone = true;
+                    _inputType = InputType.KeyBoard;
                     break;
                 }
                 
                 // Mouse 상태 내의 FSM
-                switch (mouseState)
+                switch (_mouseState)
                 {
                     case MouseState.Clicked:
 
-                        if(targetingSystem.IsCurrentTargetExist())
+                        if(_targetingSystem.IsCurrentTargetExist())
                             GetEnemyPos();
                         else
                             GetMousePos();
                         
-                        mouseState = MouseState.Move;
+                        _mouseState = MouseState.Move;
                         break;
 
                     case MouseState.Move:
 
-                        MoveByMouse();
-                        
-                        if (rb.velocity == Vector3.zero)
+                        if ((Managers.Game.Player.transform.position - _targetPosition).magnitude <= 0.1f )
                         {
-                            isMoveDone = true;
+                            _mouseState = MouseState.Finish;
                             break;
                         }
                         
+                        MoveByMouse();
+                        
                         if (Input.GetMouseButton(0))
                         {
-                            mouseState = MouseState.Clicked;
+                            _mouseState = MouseState.Clicked;
                             break;
                         }
                         
@@ -176,8 +159,8 @@ public class MoveState : MonoBehaviour, IStateBase
 
                     case MouseState.Finish:
                         
-                        isMoveDone = true;
-
+                        _isMoveDone = true;
+                        
                         break;
                     default:
                         break;
@@ -191,23 +174,23 @@ public class MoveState : MonoBehaviour, IStateBase
         }
 
         
-        switch (walkState)
+        switch (_walkStyle)
         {
-            case WalkState.Walk:
+            case WalkStyle.Walk:
 
                 if (!Input.GetKey(KeyCode.LeftShift))
                 {
-                    ChangeState(WalkState.Run);
+                    ChangeState(WalkStyle.Run);
                     break;
                 }
 
                 break;
             
-            case WalkState.Run:
+            case WalkStyle.Run:
 
                 if (Input.GetKey(KeyCode.LeftShift))
                 {
-                    ChangeState(WalkState.Walk);
+                    ChangeState(WalkStyle.Walk);
                     break;
                 }
                 
@@ -217,41 +200,43 @@ public class MoveState : MonoBehaviour, IStateBase
 
     public void EndState()
     {
-        // Debug.Log("Move State End!");
-        rb.velocity = Vector3.zero;
-        animator.SetBool("isWalk", false);
-        animator.SetBool("isRun", false);
+        _rb.velocity = Vector3.zero;
+        _animator.SetBool("isWalk", false);
+        _animator.SetBool("isRun", false);
     }
 
-    void ChangeState(WalkState state)
+    void ChangeState(WalkStyle style)
     {
-        if(isMouseOnInventory) return;
+        _moveHorizontal = Input.GetAxisRaw("Horizontal");
+        _moveVertical = Input.GetAxisRaw("Vertical");
 
-        switch (walkState)
+        if (EventSystem.current.IsPointerOverGameObject() && _moveHorizontal == 0 && _moveVertical == 0) return;
+
+        switch (_walkStyle)
         {
-            case WalkState.Walk:
-                animator.SetBool("isWalk", false);
+            case WalkStyle.Walk:
+                _animator.SetBool("isWalk", false);
                 break;
             
-            case WalkState.Run:
-                animator.SetBool("isRun", false);
+            case WalkStyle.Run:
+                _animator.SetBool("isRun", false);
                 break;
             default:
                 break;
         }
 
-        walkState = state;
+        _walkStyle = style;
 
-        switch (walkState)
+        switch (_walkStyle)
         {
-            case WalkState.Walk:
-                animator.SetBool("isWalk", true);
-                movingSpeed = walkSpeedOffset;
+            case WalkStyle.Walk:
+                _animator.SetBool("isWalk", true);
+                _player.GetComponent<Stat>().MoveSpeed = 200f;
                 break;
             
-            case WalkState.Run:
-                animator.SetBool("isRun", true);
-                movingSpeed = runSpeedOffset;
+            case WalkStyle.Run:
+                _animator.SetBool("isRun", true);
+                _player.GetComponent<Stat>().MoveSpeed = 400f;
                 break;
             default:
                 break;
@@ -259,84 +244,54 @@ public class MoveState : MonoBehaviour, IStateBase
     }
     private void Move()
     {
-        var camTransform = mainCam.transform;
+        var camTransform = _mainCam.transform;
         // 카메라가 보는 방향으로 이동
-        var movement = camTransform.forward * moveVertical + camTransform.right * moveHorizontal;
+        var movement = camTransform.forward * _moveVertical + camTransform.right * _moveHorizontal;
         movement.y = 0f;
 
         var camForward = Quaternion.LookRotation(movement);
-        transform.rotation = camForward;
-        rb.velocity = movement.normalized * (movingSpeed * Time.deltaTime); // 대각선 이동이 더 빠르지 않도록 노멀라이즈
+        _player.transform.rotation = camForward;
+        _rb.velocity = movement.normalized * (_player.GetComponent<Stat>().MoveSpeed * Time.deltaTime); // 대각선 이동이 더 빠르지 않도록 노멀라이즈
     }
 
     private void GetMousePos()
     {
-        if (isMouseOnInventory) return;
-        
-        Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
+        if (EventSystem.current.IsPointerOverGameObject()) return;
+
+        Ray ray = _mainCam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, 1000f, 1 << LayerMask.NameToLayer("Ground")))
+        if (Physics.Raycast(ray, out hit, 1000f, 1 << LayerMask.NameToLayer("Ground") | 1 << LayerMask.NameToLayer("Enemy")))
         {
-            targetPosition = hit.point;
-            // 클릭 애니메이션 생성 및 도착지 트리거 생성
-            particleManager.CreateMouseClickParticle(targetPosition);
+            _targetPosition = hit.point;
+
+            if (hit.transform.gameObject.layer == 1 << LayerMask.NameToLayer("Enemy"))
+                _targetingSystem.Target = hit.transform.gameObject;
+            else _targetingSystem.Target = null;
+            
         }
     }
 
     private void GetEnemyPos()
     {
-        if(targetingSystem.IsCurrentTargetExist())
-            targetPosition = targetingSystem.GetCurrentTargetPos();
+        _targetPosition = _targetingSystem.Target.transform.position;
     }
     
     private void MoveByMouse()
     {
+        if (EventSystem.current.IsPointerOverGameObject()) return;
+        
         // 마우스로 움직이는 방식
-        var position = transform.position;
+        var position = _player.transform.position;
 
-        targetPosition.y = position.y; // 캐릭터의 높이와 맞추기
-        Vector3 moveDirection = (targetPosition - position).normalized;
-        rb.velocity = moveDirection * (movingSpeed * Time.deltaTime);
+        _targetPosition.y = position.y; // 캐릭터의 높이와 맞추기
+        Vector3 moveDirection = (_targetPosition - position).normalized;
+        _rb.velocity = moveDirection * (_player.GetComponent<Stat>().MoveSpeed * Time.deltaTime);
 
         // 캐릭터가 바라보는 방향 조절
-        Vector3 lookAtTarget = new Vector3(targetPosition.x, position.y, targetPosition.z);
-        transform.LookAt(lookAtTarget);
+        Vector3 lookAtTarget = new Vector3(_targetPosition.x, position.y, _targetPosition.z);
+        _player.transform.LookAt(lookAtTarget);
     }
     
-    public void SetSpeed(float speedValue)
-    {
-        movingSpeed = speedValue;
-    }
-    
-    public float GetSpeed()
-    {
-        return movingSpeed;
-    }
-    
-    public bool GetIsMoveDone()
-    {
-        return isMoveDone;
-    }
-    
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("DestPos"))
-        {
-            Destroy(other);
-            mouseState = MouseState.Finish;
-        }
-    }
-
-    // Unity SendMassage from InventoryHandle
-    private void LockMakingWaypoint()
-    {
-        isMouseOnInventory = true;
-    }
-    
-    // Unity SendMassage from InventoryHandle
-    private void UnlockMakingWaypoint()
-    {
-        isMouseOnInventory = false;
-    }
+    public bool GetIsMoveDone() => _isMoveDone;
 }
