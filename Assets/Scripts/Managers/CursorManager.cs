@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.PlayerLoop;
 
 public class CursorManager
@@ -10,6 +11,9 @@ public class CursorManager
     private Texture2D battleCursor;
     private Texture2D grabCursor;
     private Texture2D grabbingCursor;
+
+    private bool isDrag = false;
+    public bool IsDragging => isDrag;
     
     public void Init()
     {
@@ -27,15 +31,25 @@ public class CursorManager
     public void ChangeCursorForGrab()
     {
         Cursor.SetCursor(grabCursor, new Vector2(grabCursor.width / 2, grabCursor.height / 2), CursorMode.Auto);
+        isDrag = false;
+        Debug.Log("IsDrag = " + isDrag);
     }
     
     public void ChangeCursorForGrabbing()
     {
         Cursor.SetCursor(grabbingCursor, new Vector2(grabbingCursor.width / 2, grabbingCursor.height / 2), CursorMode.Auto);
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            isDrag = true;
+        }
+
+        Debug.Log("IsDrag = " + isDrag);
     }
 
     public void BackNormalCursor()
     {
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+        isDrag = false;
+        Debug.Log("IsDrag = " + isDrag);
     }
 }

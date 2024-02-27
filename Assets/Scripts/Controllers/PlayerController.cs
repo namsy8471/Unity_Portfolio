@@ -123,7 +123,7 @@ public class PlayerController : MonoBehaviour
         {
             case PlayerState.Move:
 
-                if (_moveState.GetIsMoveDone())
+                if (_moveState.IsMoveDone)
                 {
                     ChangeState(PlayerState.Idle);
                     break;

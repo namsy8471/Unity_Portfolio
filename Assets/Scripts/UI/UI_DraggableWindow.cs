@@ -6,8 +6,8 @@ public class UI_DraggableWindow : MonoBehaviour, IDragHandler, IEndDragHandler, 
 {
     protected RectTransform rectTransform;
     
-    protected static Action changeMouseCursorToGrabbing;
-    protected static Action changeMouseCursorToNormal;
+    protected Action changeMouseCursorToGrabbing;
+    protected Action changeMouseCursorToNormal;
     
     protected Vector2 firstClickedPos;
     protected Vector2 distanceWithWindow;

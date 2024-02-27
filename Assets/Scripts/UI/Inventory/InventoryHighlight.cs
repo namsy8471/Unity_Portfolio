@@ -13,6 +13,7 @@ public class InventoryHighlight
         _highlighter = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/UI/Inventory/UI_Highlighter")).GetComponent<RectTransform>();
         _highlighter.transform.parent = Managers.Game.MainInventoryUICanvas.transform;
     }
+    
     public void Show(bool value)
     {
         _highlighter.gameObject.SetActive(value);

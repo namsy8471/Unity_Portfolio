@@ -1,29 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu]
 public class ItemDataBackpack : ItemData
 {
-    [SerializeField] private GameObject inventoryPrefab;
-    [SerializeField] private GameObject inventory;
+    [SerializeField] private GameObject _inventoryPrefab;
+    [SerializeField] private GameObject _inventory;
     
-    private ItemGrid itemGrid;
+    private ItemGrid _itemGrid;
     
-    private bool isOpen;
+    private bool _isOpen;
     
     public override void Init()
     {
-        isOpen = false;
+        _isOpen = false;
         
         //가방 만들기
-        if (inventory == null)
+        if (_inventory == null)
         {
-            inventory = Instantiate(inventoryPrefab, new Vector2(1280, 720), Quaternion.identity,
-                GameObject.Find("MainInventory").transform);
-            inventory.transform.SetAsFirstSibling();
-            inventory.GetComponentInChildren<ItemGrid>().SetGrid(6, 6);
-            inventory.gameObject.SetActive(isOpen);
+            _inventory = Instantiate(_inventoryPrefab, new Vector2(1280, 720), Quaternion.identity,
+                Managers.Game.MainInventoryUICanvas.transform);
+            _inventory.transform.SetAsFirstSibling();
+            _inventory.GetComponentInChildren<ItemGrid>().SetGrid(6, 6);
+            _inventory.gameObject.SetActive(_isOpen);
         }
         
         Debug.Log("가방 만들어짐!");
@@ -32,20 +33,20 @@ public class ItemDataBackpack : ItemData
     public override void UseItem()
     {
         // 가방 열기 및 닫기
-        isOpen = !isOpen;
-        inventory.gameObject.SetActive(isOpen);
+        _isOpen = !_isOpen;
+        _inventory.gameObject.SetActive(_isOpen);
         Debug.Log("가방 사용됨!");
     }
 
     public override void DropItem()
     {
         Debug.Log("가방 버려짐!");
-        Destroy(inventory.gameObject);
+        Destroy(_inventory.gameObject);
     }
 
     public override void PickUpItem()
     {
-        isOpen = false;
-        inventory.gameObject.SetActive(isOpen);
+        _isOpen = false;
+        _inventory.gameObject.SetActive(_isOpen);
     }
 }

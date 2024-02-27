@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -56,31 +57,12 @@ public class InventoryController
         
         _inventoryHighlight.Init();
         
-        var canvas = Managers.Game.MainInventoryUICanvas;
-        gr = canvas.GetComponent<GraphicRaycaster>();
+        _canvasTransform = Managers.Game.MainInventoryUICanvas.transform;
     }
 
     public void Update()
     {
-        if (_selectedItem == null)
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            
-            if (Physics.Raycast(ray, out RaycastHit hit, 100.0f, 1 << LayerMask.NameToLayer("Item")))
-            {
-                //TODO 아이템 루팅 픽업 만들기
-                
-                if(Input.GetMouseButton(0))
-                    _changeCursorForGrabbing?.Invoke();
-                else
-                    _changeCursorForGrab?.Invoke();
-            }
-            else
-            {
-                _changeCursorForNormal?.Invoke();
-            }
-        }
-
+        LootingItemFromGround();
         ItemDrag();
         
         if (Input.GetKeyDown(KeyCode.Q))
@@ -120,6 +102,31 @@ public class InventoryController
         if (Input.GetMouseButtonDown(1))
         {
             UseItem();
+        }
+    }
+
+    private void LootingItemFromGround()
+    {
+        if (_selectedItem == null && EventSystem.current.IsPointerOverGameObject() == false)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            
+            if (Physics.Raycast(ray, out RaycastHit hit, 100.0f, 1 << LayerMask.NameToLayer("Item")))
+            {
+                //TODO 아이템 루팅 픽업 만들기
+                
+                if(Vector3.Distance(hit.point, Managers.Game.Player.transform.position) < 1.0f)
+                    LootingItem(hit.transform.name);
+                
+                if(Input.GetMouseButton(0))
+                    _changeCursorForGrabbing?.Invoke();
+                else
+                    _changeCursorForGrab?.Invoke();
+            }
+            else
+            {
+                _changeCursorForNormal?.Invoke();
+            }
         }
     }
 
@@ -195,7 +202,7 @@ public class InventoryController
 
     private void CreateRandomItem()
     {
-        InventoryItem inventoryItem = GameObject.Instantiate(_itemPrefab).GetComponent<InventoryItem>();
+        InventoryItem inventoryItem = GameObject.Instantiate(_itemPrefab).AddComponent<InventoryItem>();
         _selectedItem = inventoryItem;
         
         _rectTransform = inventoryItem.GetComponent<RectTransform>();
@@ -282,12 +289,13 @@ public class InventoryController
     // 아이템 줍기
     public void LootingItem(string itemName)
     {
-        InventoryItem pickedUpItem = GameObject.Instantiate(_itemPrefab).GetComponent<InventoryItem>();
+        InventoryItem pickedUpItem = GameObject.Instantiate(new GameObject {name = $"{itemName}Icon"}).AddComponent<InventoryItem>();
+        pickedUpItem.AddComponent<Image>();
         _selectedItem = pickedUpItem;
         
-        _rectTransform = pickedUpItem.GetComponent<RectTransform>();
+        _rectTransform = pickedUpItem.transform as RectTransform;
         _rectTransform.SetParent(_canvasTransform);
-        _rectTransform.SetAsLastSibling();
+        //_rectTransform.SetAsLastSibling();
         
         pickedUpItem.SetItemData(_itemData[itemName]);
         pickedUpItem.name = pickedUpItem.ItemData.ItemName;

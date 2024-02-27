@@ -5762,15 +5762,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4423662366679264837, guid: e3c7f2aa87c7f6f40bc6896117258c43, type: 3}
       propertyPath: m_Name
-      value: Potion
-      objectReference: {fileID: 0}
-    - target: {fileID: 4423662366679264837, guid: e3c7f2aa87c7f6f40bc6896117258c43, type: 3}
-      propertyPath: m_Layer
-      value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 4423662367792711681, guid: e3c7f2aa87c7f6f40bc6896117258c43, type: 3}
-      propertyPath: m_Layer
-      value: 9
+      value: HpPotion
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e3c7f2aa87c7f6f40bc6896117258c43, type: 3}
@@ -11410,19 +11402,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1848945606634156650, guid: 96b5a675ae6ea9b41b0e59db775b34c8, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.92483354
+      value: 0.9248399
       objectReference: {fileID: 0}
     - target: {fileID: 1848945606634156650, guid: 96b5a675ae6ea9b41b0e59db775b34c8, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.35231388
+      value: 0.35230005
       objectReference: {fileID: 0}
     - target: {fileID: 1848945606634156650, guid: 96b5a675ae6ea9b41b0e59db775b34c8, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.1339833
+      value: 0.13397647
       objectReference: {fileID: 0}
     - target: {fileID: 1848945606634156650, guid: 96b5a675ae6ea9b41b0e59db775b34c8, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.051053625
+      value: -0.051049452
       objectReference: {fileID: 0}
     - target: {fileID: 1848945606634156650, guid: 96b5a675ae6ea9b41b0e59db775b34c8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
