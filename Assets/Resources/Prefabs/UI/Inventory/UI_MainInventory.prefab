@@ -476,11 +476,11 @@ RectTransform:
   m_Father: {fileID: 3631918759777419717}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -1919, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 1, y: 1}
-  m_Pivot: {x: 1, y: 1}
+  m_Pivot: {x: 0, y: 1}
 --- !u!1 &6542281984047537825
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,7 +492,7 @@ GameObject:
   - component: {fileID: 6542281984047537826}
   - component: {fileID: 6542281984047537828}
   - component: {fileID: 6542281984047537827}
-  - component: {fileID: 6542281984047537829}
+  - component: {fileID: 8884693017529070421}
   - component: {fileID: 6542281984047537830}
   m_Layer: 5
   m_Name: GridInventory
@@ -559,7 +559,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &6542281984047537829
+--- !u!114 &8884693017529070421
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -568,7 +568,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6542281984047537825}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62d5f8c9669fb014ea79491a023b4609, type: 3}
+  m_Script: {fileID: 11500000, guid: f9d029a6bedb1a748adb60551b5defd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &6542281984047537830

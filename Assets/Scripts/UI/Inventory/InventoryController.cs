@@ -4,18 +4,19 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 public class InventoryController
 {
-    private ItemGrid _selectedItemGrid;
+    private Inventory_Base _selectedInventory;
 
-    public ItemGrid SelectedItemGrid
+    public Inventory_Base SelectedInventory
     {
-        get => _selectedItemGrid;
+        get => _selectedInventory;
         set
         {
-            _selectedItemGrid = value; 
+            _selectedInventory = value; 
             _inventoryHighlight.SetParent(value);
         }
     }
@@ -42,8 +43,6 @@ public class InventoryController
     private Action _changeCursorForGrabbing;
     private Action _changeCursorForNormal;
     
-    private GraphicRaycaster gr;
-    
     public void Init()
     {
         _itemData.Add("Backpack", Resources.Load<ItemData>("ItemData/Backpack"));
@@ -57,7 +56,7 @@ public class InventoryController
         
         _inventoryHighlight.Init();
         
-        _canvasTransform = Managers.Game.MainInventoryUICanvas.transform;
+        _canvasTransform = Managers.Game.InventoryUICanvas.gameObject.transform;
     }
 
     public void Update()
@@ -65,35 +64,15 @@ public class InventoryController
         LootingItemFromGround();
         ItemDrag();
         
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            if(_selectedItem == null)
-                CreateRandomItem();
-        }
-
-        if (Input.GetKey(KeyCode.Z))
-        {
-            InsertRandomItem();
-        }
-
         if (Input.GetKeyDown(KeyCode.R))
         {
             RotateItem();
         }
         
-        if (!_selectedItemGrid)
-        {
-            _inventoryHighlight.Show(false);
-            if (Input.GetMouseButtonDown(0))
-            {
-                if(_selectedItem != null) 
-                    DropItemOnTheGround();
-            }
-            return;
-        }
-
         HandleHighlight();
 
+        if (_selectedInventory == null) return;
+        
         if (Input.GetMouseButtonDown(0))
         {
             LeftMouseButtonPress();
@@ -105,29 +84,36 @@ public class InventoryController
         }
     }
 
+    private GameObject _choiceToLoot;
+    
     private void LootingItemFromGround()
     {
-        if (_selectedItem == null && EventSystem.current.IsPointerOverGameObject() == false)
+        if (_selectedItem != null || EventSystem.current.IsPointerOverGameObject()) return;
+        
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        
+        if (Physics.Raycast(ray, out RaycastHit hit, 100.0f, 1 << LayerMask.NameToLayer("Item")))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            
-            if (Physics.Raycast(ray, out RaycastHit hit, 100.0f, 1 << LayerMask.NameToLayer("Item")))
+            if (Input.GetMouseButton(0))
             {
-                //TODO 아이템 루팅 픽업 만들기
-                
-                if(Vector3.Distance(hit.point, Managers.Game.Player.transform.position) < 1.0f)
-                    LootingItem(hit.transform.name);
-                
-                if(Input.GetMouseButton(0))
-                    _changeCursorForGrabbing?.Invoke();
-                else
-                    _changeCursorForGrab?.Invoke();
+                _changeCursorForGrabbing?.Invoke();
+                _choiceToLoot = hit.transform.gameObject;
+                Managers.Game.Player.GetComponent<PlayerController>().MoveState.DestPos = _choiceToLoot.transform.position;
             }
             else
+                _changeCursorForGrab?.Invoke();
+            
+            if (_choiceToLoot == hit.transform.gameObject && Vector3.Distance(hit.point, Managers.Game.Player.transform.position) < 1.0f)
             {
-                _changeCursorForNormal?.Invoke();
+                LootingItem(hit.transform.name);
+                Object.Destroy(hit.transform.gameObject);
             }
         }
+        else
+        {
+            _changeCursorForNormal?.Invoke();
+        }
+    
     }
 
     private void RotateItem()
@@ -140,45 +126,38 @@ public class InventoryController
         _selectedItem.Rotate();
     }
 
-    private void InsertRandomItem()
-    {
-        if (_selectedItemGrid == null)
-        {
-            return;
-        }
-        
-        CreateRandomItem();
-        InventoryItem itemToInsert = _selectedItem;
-        _selectedItem = null;
-        InsertItem(itemToInsert);
-    }
-
     private void InsertItem(InventoryItem itemToInsert)
     {
-        Vector2Int? posOnGrid = _selectedItemGrid.FindSpaceForObject(itemToInsert);
+        Vector2Int? posOnGrid = _selectedInventory.FindSpaceForObject(itemToInsert);
         
         if(posOnGrid == null) return;
 
-        _selectedItemGrid.PlaceItem(itemToInsert, posOnGrid.Value.x, posOnGrid.Value.y);
+        _selectedInventory.PlaceItem(itemToInsert, posOnGrid.Value.x, posOnGrid.Value.y);
     }
 
     private void HandleHighlight()
     {
         Vector2Int positionOnGrid = GetTileGridPosition();
+        
         if (_oldPosition == positionOnGrid) return;
+        if (positionOnGrid == new Vector2Int(-1, -1))
+        {
+            _inventoryHighlight.Show(false);
+            return;
+        }
 
         _oldPosition = positionOnGrid;
         
         if (_selectedItem == null)
         {
-            _itemToHighlight = _selectedItemGrid.GetItem(positionOnGrid.x, positionOnGrid.y);
+            _itemToHighlight = _selectedInventory.GetItem(positionOnGrid.x, positionOnGrid.y);
 
             if (_itemToHighlight != null)
             {
                 _inventoryHighlight.Show(true);
                 _inventoryHighlight.SetSize(_itemToHighlight);
-                _inventoryHighlight.SetParent(_selectedItemGrid);
-                _inventoryHighlight.SetPosition(_selectedItemGrid,_itemToHighlight);
+                _inventoryHighlight.SetParent(_selectedInventory);
+                _inventoryHighlight.SetPosition(_selectedInventory,_itemToHighlight);
             }
             else
             {
@@ -187,7 +166,7 @@ public class InventoryController
         }
         else
         {
-            _inventoryHighlight.Show(_selectedItemGrid.BoundaryCheck(
+            _inventoryHighlight.Show(_selectedInventory.BoundaryCheck(
                 positionOnGrid.x,
                 positionOnGrid.y,
                 _selectedItem.Width,
@@ -195,37 +174,33 @@ public class InventoryController
                 )
             );
             _inventoryHighlight.SetSize(_selectedItem);
-            _inventoryHighlight.SetParent(_selectedItemGrid);
-            _inventoryHighlight.SetPosition(_selectedItemGrid, _selectedItem, positionOnGrid.x, positionOnGrid.y);
+            _inventoryHighlight.SetParent(_selectedInventory);
+            _inventoryHighlight.SetPosition(_selectedInventory, _selectedItem, positionOnGrid.x, positionOnGrid.y);
         }
-    }
-
-    private void CreateRandomItem()
-    {
-        InventoryItem inventoryItem = GameObject.Instantiate(_itemPrefab).AddComponent<InventoryItem>();
-        _selectedItem = inventoryItem;
-        
-        _rectTransform = inventoryItem.GetComponent<RectTransform>();
-        _rectTransform.SetParent(_canvasTransform);
-        _rectTransform.SetAsLastSibling();
-
-        var randomItemID = Random.Range(0, _items.Count);
-        inventoryItem.SetItemData(_items[randomItemID]);
     }
 
     private void LeftMouseButtonPress()
     {
         var tileGridPosition = GetTileGridPosition();
 
-        Debug.Log(tileGridPosition);
-        
-        if (_selectedItem == null)
+        // 인벤토리 밖이라면
+        if (tileGridPosition == new Vector2Int(-1, -1))
         {
-            PickUpItem(tileGridPosition);
+            if (_selectedItem != null)
+            {
+                DropItemOnTheGround();
+            }
         }
         else
         {
-            PlaceItem(tileGridPosition);
+            if (_selectedItem != null)
+            {
+                PlaceItem(tileGridPosition);
+            }
+            else
+            {
+                PickUpItem(tileGridPosition);
+            }   
         }
     }
 
@@ -239,13 +214,14 @@ public class InventoryController
             position.y += (_selectedItem.Height) * ItemGrid.TileSize.Height / 2;
         }
 
-        Vector2Int tileGridPosition = _selectedItemGrid.GetTileGridPosition(position);
+        Vector2Int tileGridPosition = _selectedInventory?.GetTileGridPosition(position) ?? new Vector2Int(-1, -1);
+        
         return tileGridPosition;
     }
 
     private void PlaceItem(Vector2Int tileGridPosition)
     {
-        bool result = _selectedItemGrid.PlaceItem(_selectedItem, tileGridPosition.x, tileGridPosition.y, ref _overlapItem);
+        bool result = _selectedInventory.PlaceItem(_selectedItem, tileGridPosition.x, tileGridPosition.y, ref _overlapItem);
         if (result)
         {
             _selectedItem = null;
@@ -256,12 +232,13 @@ public class InventoryController
                 _rectTransform = _selectedItem.GetComponent<RectTransform>();
                 _rectTransform.SetAsLastSibling();
             }
+            
         }
     }
 
     private void PickUpItem(Vector2Int tileGridPosition)
     {
-        _selectedItem = _selectedItemGrid.PickUpItem(tileGridPosition.x, tileGridPosition.y);
+        _selectedItem = _selectedInventory.PickUpItem(tileGridPosition.x, tileGridPosition.y);
         _selectedItem.ItemData.PickUpItem();
         
         if(_selectedItem != null)
@@ -279,9 +256,9 @@ public class InventoryController
             
             _rectTransform.position = position;
 
-            if (_selectedItemGrid)
+            if (_selectedInventory != null)
             {
-                _selectedItem.transform.SetParent(_selectedItemGrid.transform);
+                _selectedItem.transform.SetParent(_selectedInventory.GetComponent<RectTransform>());
             }
         }
     }
@@ -289,27 +266,27 @@ public class InventoryController
     // 아이템 줍기
     public void LootingItem(string itemName)
     {
-        InventoryItem pickedUpItem = GameObject.Instantiate(new GameObject {name = $"{itemName}Icon"}).AddComponent<InventoryItem>();
+        GameObject pickUpItemInstance = GameObject.Instantiate(new GameObject { name = $"{itemName} Icon" });
+        InventoryItem pickedUpItem = pickUpItemInstance.AddComponent<InventoryItem>();
         pickedUpItem.AddComponent<Image>();
-        _selectedItem = pickedUpItem;
         
         _rectTransform = pickedUpItem.transform as RectTransform;
         _rectTransform.SetParent(_canvasTransform);
-        //_rectTransform.SetAsLastSibling();
         
         pickedUpItem.SetItemData(_itemData[itemName]);
-        pickedUpItem.name = pickedUpItem.ItemData.ItemName;
+        //pickedUpItem.name = pickedUpItem.ItemData.ItemName;
         pickedUpItem.ItemData.Init();
+        
+        _selectedItem = pickedUpItem;
+        
+        _changeCursorForNormal?.Invoke();
     }
 
     // 아이템 드랍
     private void DropItemOnTheGround()
     {
         if (_selectedItem == null) return;
-        
-        // UI 레이캐스팅
-        var results = GraphicRaycastResults();
-        if (results.Count > 0) return;
+        if (EventSystem.current.IsPointerOverGameObject()) return;
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
@@ -326,22 +303,13 @@ public class InventoryController
         _dropItemModeling = _selectedItem.ItemData.ItemModelingForDropping;
         
         var droppedItem = GameObject.Instantiate(_dropItemModeling, pos, _dropItemModeling.transform.rotation);
-        droppedItem.GetComponent<DroppedItem>().ItemData = _selectedItem.ItemData;
+        droppedItem.GetComponent<ItemNameTag>().ItemData = _selectedItem.ItemData;
         
         // 아이템 프리펩 생성
         _selectedItem.ItemData.DropItem();
         _inventoryHighlight.Highlighter.SetParent(_canvasTransform);
         GameObject.Destroy(_selectedItem.gameObject);
         _selectedItem = null;
-    }
-
-    private List<RaycastResult> GraphicRaycastResults()
-    {
-        var ped = new PointerEventData(null);
-        ped.position = Input.mousePosition;
-        List<RaycastResult> results = new List<RaycastResult>();
-        gr.Raycast(ped, results);
-        return results;
     }
 
     // 아이템 사용

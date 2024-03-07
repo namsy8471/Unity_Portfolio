@@ -123,8 +123,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 4477601262277782079}
-        m_TargetAssemblyTypeName: InventoryHandle, Assembly-CSharp
-        m_MethodName: InventoryCloseButtonClick
+        m_TargetAssemblyTypeName: UI_InventoryUpperBar, Assembly-CSharp
+        m_MethodName: CloseButtonClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -225,7 +225,7 @@ GameObject:
   - component: {fileID: 4477601261833134483}
   - component: {fileID: 4477601261833134485}
   - component: {fileID: 4477601261833134482}
-  - component: {fileID: 4477601261833134484}
+  - component: {fileID: 2066278553581033512}
   - component: {fileID: 4477601261833134487}
   m_Layer: 5
   m_Name: GridInventory
@@ -292,7 +292,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &4477601261833134484
+--- !u!114 &2066278553581033512
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -301,7 +301,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4477601261833134480}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62d5f8c9669fb014ea79491a023b4609, type: 3}
+  m_Script: {fileID: 11500000, guid: fda2d80b0aa393644b57901cbe8808de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &4477601261833134487
@@ -349,11 +349,11 @@ RectTransform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 1, y: 1}
-  m_Pivot: {x: 1, y: 1}
+  m_Pivot: {x: 0, y: 1}
 --- !u!1 &4477601262277782075
 GameObject:
   m_ObjectHideFlags: 0

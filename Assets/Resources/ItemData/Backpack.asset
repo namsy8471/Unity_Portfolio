@@ -21,3 +21,5 @@ MonoBehaviour:
   groundYOffset: 0.292
   _inventoryPrefab: {fileID: 4477601261976165356, guid: b22489171cc00cb4fa9b13c4ecf4becb, type: 3}
   _inventory: {fileID: 0}
+  _inventoryWidth: 6
+  _inventoryHeight: 6

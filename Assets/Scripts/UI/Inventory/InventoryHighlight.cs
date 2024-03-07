@@ -11,7 +11,7 @@ public class InventoryHighlight
     public void Init()
     {
         _highlighter = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/UI/Inventory/UI_Highlighter")).GetComponent<RectTransform>();
-        _highlighter.transform.parent = Managers.Game.MainInventoryUICanvas.transform;
+        _highlighter.transform.parent = Managers.Game.InventoryUICanvas.transform;
     }
     
     public void Show(bool value)
@@ -28,20 +28,20 @@ public class InventoryHighlight
         _highlighter.sizeDelta = size;
     }
     
-    public void SetParent(ItemGrid targetGrid)
+    public void SetParent(Inventory_Base targetInventory)
     {
-        if (targetGrid == null) return;
-        _highlighter.SetParent(targetGrid.GetComponent<RectTransform>());
+        if (targetInventory == null) return;
+        _highlighter.SetParent(targetInventory.transform);
     }
 
-    public void SetPosition(ItemGrid targetGrid, InventoryItem targetItem)
+    public void SetPosition(Inventory_Base targetInventory, InventoryItem targetItem)
     {
         _highlighter.localPosition =
-            targetGrid.CalculatePositionOnGrid(targetItem, targetItem.GridPosX, targetItem.GridPosY);
+            targetInventory.CalculatePositionOnGrid(targetItem, targetItem.GridPosX, targetItem.GridPosY);
     }
     
-    public void SetPosition(ItemGrid targetGrid, InventoryItem targetItem, int posX, int posY)
+    public void SetPosition(Inventory_Base targetInventory, InventoryItem targetItem, int posX, int posY)
     {
-        _highlighter.localPosition = targetGrid.CalculatePositionOnGrid(targetItem, posX, posY);
+        _highlighter.localPosition = targetInventory.CalculatePositionOnGrid(targetItem, posX, posY);
     }
 }

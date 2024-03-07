@@ -24,6 +24,9 @@ public class PlayerController : MonoBehaviour
 
     private readonly IdleState _idleState = new IdleState();
     private readonly MoveState _moveState = new MoveState();
+
+    public MoveState MoveState => _moveState;
+    
     private readonly AttackState _attackState = new AttackState();
     private readonly GetDamageState _getDamageState = new GetDamageState();
     private TargetingSystem _targetingSystem;

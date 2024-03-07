@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Managers : MonoBehaviour
@@ -13,11 +12,13 @@ public class Managers : MonoBehaviour
     private CursorManager _cursor = new CursorManager();
     private SoundManager _sound = new SoundManager();
     private ParticleManager _particle = new ParticleManager();
+    private InputManager _input = new InputManager();
     
     public static GameManager Game => Instance._game;
     public static CursorManager Cursor => Instance._cursor;
     public static SoundManager Sound => Instance._sound;
     public static ParticleManager Particle => Instance._particle;
+    public static InputManager Input => Instance._input;
     
     private void Start()
     {
@@ -37,7 +38,8 @@ public class Managers : MonoBehaviour
             
             DontDestroyOnLoad(obj);
             _instance = obj.GetComponent<Managers>();
-
+            
+            Input.Init();
             Cursor.Init();
             Game.Init();
             Sound.Init();
@@ -47,6 +49,7 @@ public class Managers : MonoBehaviour
 
     private void Update()
     {
+        Input.Update();
         Game.Update();
     }
 }

@@ -38,6 +38,12 @@ public class MoveState : IStateBase
 
     private GameObject _player;
     private Vector3 _destPos; // 목표 위치
+    public Vector3 DestPos
+    {
+        get => _destPos;
+        set => _destPos = value;
+    }
+    
     private Rigidbody _rb;          // 리지드바디
 
     private bool _isMoveDone;        // 이동 종료?

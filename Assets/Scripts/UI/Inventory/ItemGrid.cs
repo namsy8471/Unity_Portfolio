@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
-public class ItemGrid : MonoBehaviour
+public class ItemGrid
 {
     // 타일 하나 당 픽셀 크기 정의
     public struct TileSize
@@ -19,39 +19,41 @@ public class ItemGrid : MonoBehaviour
         public int width;
         public int height;
     }
-    private GridSize gridSize;
+    private GridSize _gridSize;
     
-    private InventoryItem[,] inventoryItemSlot;
-    private RectTransform rectTransform;
+    private InventoryItem[,] _inventoryItemSlot;
+    private RectTransform _rectTransform;
 
-    private Vector2 positionOnTheGrid = new Vector2();
-    private Vector2Int tileGridPosition = new Vector2Int();
+    public RectTransform Rect => _rectTransform;
+    
+    private Vector2 _positionOnTheGrid = new Vector2();
+    private Vector2Int _tileGridPosition = new Vector2Int();
     
     private void Init(int width, int height)
     {
-        inventoryItemSlot = new InventoryItem[width, height];
-        rectTransform.sizeDelta = new Vector2(width * TileSize.Width, height * TileSize.Height);
+        _inventoryItemSlot = new InventoryItem[width, height];
+        _rectTransform.sizeDelta = new Vector2(width * TileSize.Width, height * TileSize.Height);
     }
 
-    public void SetGrid(int width, int height)
+    public void SetGrid(RectTransform rect, int width, int height)
     {
-        rectTransform = GetComponent<RectTransform>();
-        gridSize.width = width;
-        gridSize.height = height;
-        Init(gridSize.width, gridSize.height);
+        _rectTransform = rect;
+        _gridSize.width = width;
+        _gridSize.height = height;
+        Init(_gridSize.width, _gridSize.height);
     }
     
     public Vector2Int GetTileGridPosition(Vector2 mousePos)
     {
-        var rectPos = rectTransform.position; 
+        var rectPos = _rectTransform.position; 
         
-        positionOnTheGrid.x = mousePos.x - rectPos.x;
-        positionOnTheGrid.y = rectPos.y - mousePos.y;
+        _positionOnTheGrid.x = mousePos.x - rectPos.x;
+        _positionOnTheGrid.y = rectPos.y - mousePos.y;
 
-        tileGridPosition.x = (int)(positionOnTheGrid.x / TileSize.Width);
-        tileGridPosition.y = (int)(positionOnTheGrid.y / TileSize.Height);
+        _tileGridPosition.x = (int)(_positionOnTheGrid.x / TileSize.Width);
+        _tileGridPosition.y = (int)(_positionOnTheGrid.y / TileSize.Height);
 
-        return tileGridPosition;
+        return _tileGridPosition;
     }
 
     public bool PlaceItem(InventoryItem inventoryItem, int posX, int posY, ref InventoryItem overlapItem)
@@ -82,13 +84,13 @@ public class ItemGrid : MonoBehaviour
     public void PlaceItem(InventoryItem inventoryItem, int posX, int posY)
     {
         var rectTransform = inventoryItem.GetComponent<RectTransform>();
-        rectTransform.SetParent(this.rectTransform);
+        rectTransform.SetParent(_rectTransform);
 
         for (int x = 0; x < inventoryItem.Width; x++)
         {
             for (int y = 0; y < inventoryItem.Height; y++)
             {
-                inventoryItemSlot[posX + x, posY + y] = inventoryItem;
+                _inventoryItemSlot[posX + x, posY + y] = inventoryItem;
             }
         }
 
@@ -114,15 +116,15 @@ public class ItemGrid : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                if (inventoryItemSlot[posX + x, posY + y] != null)
+                if (_inventoryItemSlot[posX + x, posY + y] != null)
                 {
                     if (overlapItem == null)
                     {
-                        overlapItem = inventoryItemSlot[posX + x, posY + y];
+                        overlapItem = _inventoryItemSlot[posX + x, posY + y];
                     }
                     else
                     {
-                        if (overlapItem != inventoryItemSlot[posX + x, posY + y])
+                        if (overlapItem != _inventoryItemSlot[posX + x, posY + y])
                         {
                             return false;
                         }
@@ -139,7 +141,7 @@ public class ItemGrid : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                if (inventoryItemSlot[posX + x, posY + y] != null)
+                if (_inventoryItemSlot[posX + x, posY + y] != null)
                 {
                     return false;
                 }
@@ -150,7 +152,7 @@ public class ItemGrid : MonoBehaviour
 
     public InventoryItem PickUpItem(int posX, int posY)
     {
-        var toReturn = inventoryItemSlot[posX, posY];
+        var toReturn = _inventoryItemSlot[posX, posY];
 
         if (!toReturn)
         {
@@ -168,16 +170,16 @@ public class ItemGrid : MonoBehaviour
         {
             for (int y = 0; y < item.Height; y++)
             {
-                inventoryItemSlot[item.GridPosX + x, item.GridPosY + y] = null;
+                _inventoryItemSlot[item.GridPosX + x, item.GridPosY + y] = null;
             }
         }
     }
 
     bool PositionCheck(int posX, int posY)
     {
-        if (posX < 0 || posY < 0 || posX >= gridSize.width || posY >= gridSize.height)
+        if (posX < 0 || posY < 0 || posX >= _gridSize.width || posY >= _gridSize.height)
         {
-            Debug.Log("posX : "+ posX + " posY : " + posY + " GridSize.Width : " + gridSize.width + " GridSize.Height : " + gridSize.height );
+            Debug.Log("posX : "+ posX + " posY : " + posY + " GridSize.Width : " + _gridSize.width + " GridSize.Height : " + _gridSize.height );
             return false;
         }
         return true;
@@ -203,13 +205,13 @@ public class ItemGrid : MonoBehaviour
 
     public InventoryItem GetItem(int x, int y)
     {
-        return inventoryItemSlot[x, y];
+        return _inventoryItemSlot[x, y];
     }
 
     public Vector2Int? FindSpaceForObject(InventoryItem itemToInsert)
     {
-        int height = gridSize.height - itemToInsert.Height + 1;
-        int width = gridSize.width - itemToInsert.Width + 1;
+        int height = _gridSize.height - itemToInsert.Height + 1;
+        int width = _gridSize.width - itemToInsert.Width + 1;
         
         for (int y = 0; y < height; y++)
         {

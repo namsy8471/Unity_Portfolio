@@ -6,22 +6,22 @@ using UnityEngine.EventSystems;
 
 public class GridInteract : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    private InventoryController inventoryController;
-    private ItemGrid itemGrid;
+    private InventoryController _inventoryController;
+    private Inventory_Base _inventory;
     
     private void Start()
     {
-        inventoryController = Managers.Game.InventoryController;
-        itemGrid = GetComponent<ItemGrid>();
+        _inventoryController = Managers.Game.InventoryController;
+        _inventory = GetComponent<Inventory_Base>();
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        inventoryController.SelectedItemGrid = itemGrid;
+        _inventoryController.SelectedInventory = _inventory;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        inventoryController.SelectedItemGrid = null;
+        _inventoryController.SelectedInventory = null;
     }
 }

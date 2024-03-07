@@ -43,9 +43,9 @@ public class EquipmentSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
         if (inventoryController.SelectedItem != null)
         {
             equipmentItem = inventoryController.SelectedItem;
-            equipmentItemData = (ItemDataEquipment) equipmentItem.ItemData;
+            equipmentItemData = equipmentItem.ItemData as ItemDataEquipment;
             
-            if (equipmentItemData.EquipmentType == ItemDataEquipment.Type.None) return;
+            if (equipmentItemData == null) return;
             ItemDataEquipment.Type equipmentType = equipmentItemData.EquipmentType;
             
             Debug.Log("장비 타입 : " + equipmentType + "슬롯 타입 : " + equipmentSlotType);
