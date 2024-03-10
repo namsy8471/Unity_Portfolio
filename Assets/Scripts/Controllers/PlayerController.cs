@@ -16,35 +16,42 @@ public class PlayerController : MonoBehaviour
         GetDamage
     }
 
-    private enum Posture
-    {
-        Normal,
-        Battle
-    }
-
     private readonly IdleState _idleState = new IdleState();
     private readonly MoveState _moveState = new MoveState();
-
-    public MoveState MoveState => _moveState;
-    
     private readonly AttackState _attackState = new AttackState();
     private readonly GetDamageState _getDamageState = new GetDamageState();
-    private TargetingSystem _targetingSystem;
-    
+
+    public MoveState MoveState => _moveState;
+
     private bool isBattle;
 
     private Animator _animator;
-
+    
+    private List<Action> _playerMouseDownActions = new List<Action>();
+    private List<Action> _playerMousePressedActions = new List<Action>();
+    public List<Action> PlayerMouseDownActions => _playerMouseDownActions;
+    public List<Action> PlayerMousePressedActions => _playerMousePressedActions;
+    
     [SerializeField] private PlayerState currentState;
-    private Posture _posture;
     
     private void Start()
     {
         isBattle = false;
-
-        _targetingSystem = Managers.Game.TargetingSystem;
         
         _animator = GetComponentInChildren<Animator>();
+
+        #region KeyBinding in InputManager
+        Managers.Input.KeyButtonDown.Add(Managers.Input.PostureChangeKey, PostureChangeFunction);
+        
+        Managers.Input.AddAction(Managers.Input.KeyButtonPressed, Managers.Input.MoveForwardKey, ChangeToMoveState);
+        Managers.Input.AddAction(Managers.Input.KeyButtonPressed, Managers.Input.MoveBackwardKey, ChangeToMoveState);
+        Managers.Input.AddAction(Managers.Input.KeyButtonPressed, Managers.Input.MoveLeftKey, ChangeToMoveState);
+        Managers.Input.AddAction(Managers.Input.KeyButtonPressed, Managers.Input.MoveRightKey, ChangeToMoveState);
+        
+        Managers.Input.LMBPressed += ChangeToMoveState;
+        
+        _playerMousePressedActions.Add(ChangeToMoveState);
+        #endregion
         
         _idleState.Init();
         _moveState.Init();
@@ -55,40 +62,13 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         Debug.Log("플레이어 FSM = " + currentState);
-        
-        switch (_posture)
-        {
-            case Posture.Battle:
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    ChangeState(Posture.Normal);
-                    break;
-                }
-                
-                break;
-            
-            case Posture.Normal:
-                if (Input.GetKeyDown(KeyCode.Space) || _targetingSystem.IsCurrentTargetExist())
-                {
-                    ChangeState(Posture.Battle);
-                    break;
-                }
-                
-                break;
-        }
 
         switch (currentState)
         {
             case PlayerState.Idle:
                 
-                if (Input.GetMouseButton(0) || Input.GetButton("Horizontal") || Input.GetButton("Vertical"))
-                {
-                    ChangeState(PlayerState.Move);
-                    break;
-                }
-
-                if (_targetingSystem.IsCurrentTargetExist() &&
-                    Vector3.Distance(_targetingSystem.Target.transform.position, transform.position) < _attackState.GetAtkRange())
+                if (Managers.Game.TargetingSystem.IsCurrentTargetExist() &&
+                    Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position) < _attackState.GetAtkRange())
                 {
                     ChangeState(PlayerState.Attack);
                     break;
@@ -100,7 +80,7 @@ public class PlayerController : MonoBehaviour
             
             case PlayerState.Attack:
 
-                if (!_targetingSystem.IsCurrentTargetExist())
+                if (!Managers.Game.TargetingSystem.IsCurrentTargetExist())
                 {
                     ChangeState(PlayerState.Idle);    
                 }
@@ -120,6 +100,19 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void PostureChangeFunction()
+    {
+        if (Managers.Game.TargetingSystem.IsCurrentTargetExist())
+        {
+            isBattle = true;
+            _animator.SetBool("isBattle", isBattle);
+            return;
+        }
+        
+        isBattle = !isBattle;
+        _animator.SetBool("isBattle", isBattle);
+    }
+
     private void FixedUpdate()
     {
         switch (currentState)
@@ -132,8 +125,8 @@ public class PlayerController : MonoBehaviour
                     break;
                 }
 
-                if (_targetingSystem.IsCurrentTargetExist() &&
-                    Vector3.Distance(_targetingSystem.Target.transform.position, transform.position) < _attackState.GetAtkRange())
+                if (Managers.Game.TargetingSystem.IsCurrentTargetExist() &&
+                    Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position) < _attackState.GetAtkRange())
                 {
                     ChangeState(PlayerState.Attack);
                     break;
@@ -151,6 +144,8 @@ public class PlayerController : MonoBehaviour
     
     private void ChangeState(PlayerState newState)
     {
+        if (currentState == newState) return;
+        
         switch (currentState)
         {
             case PlayerState.Idle:
@@ -197,35 +192,6 @@ public class PlayerController : MonoBehaviour
                 break;
         }
     }
-
-    private void ChangeState(Posture mode)
-    {
-        switch (_posture)
-        {
-            case Posture.Normal:
-                break;
-            case Posture.Battle:
-                break;
-            default:
-                break;
-        }
-
-        _posture = mode;
-        
-        switch (_posture)
-        {
-            case Posture.Normal:
-                isBattle = false;
-                _animator.SetBool("isBattle", isBattle);
-                break;
-            case Posture.Battle:
-                isBattle = true;
-                _animator.SetBool("isBattle", isBattle);
-                break;
-            default:
-                break;
-        }    
-    }
     
     private void GetDamage(float value)
     {
@@ -238,6 +204,9 @@ public class PlayerController : MonoBehaviour
     {
         ChangeState(PlayerState.Idle);
     }
-    
-    
+
+    private void ChangeToMoveState()
+    {
+        ChangeState(PlayerState.Move);
+    }
 }

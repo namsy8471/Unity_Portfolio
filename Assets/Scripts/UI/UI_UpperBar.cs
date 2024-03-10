@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class UI_InventoryUpperBar : UI_DraggableWindow
+public class UI_UpperBar : UI_DraggableWindow
 {
     private void Start()
     {
@@ -14,6 +14,7 @@ public class UI_InventoryUpperBar : UI_DraggableWindow
     public override void CloseButtonClick()
     {
         transform.parent.root.gameObject.SetActive(false);
+        Managers.Input.RemovePlayerMouseActions();
+        Managers.Input.RollbackPlayerMouseActions();
     }
-    
 }
