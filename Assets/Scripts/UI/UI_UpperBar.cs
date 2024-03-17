@@ -13,7 +13,7 @@ public class UI_UpperBar : UI_DraggableWindow
     
     public override void CloseButtonClick()
     {
-        transform.parent.root.gameObject.SetActive(false);
+        transform.parent.gameObject.SetActive(false);
         Managers.Input.RemovePlayerMouseActions();
         Managers.Input.RollbackPlayerMouseActions();
     }

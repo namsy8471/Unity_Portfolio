@@ -15,7 +15,7 @@ public class GetDamageState : IStateBase
     private float downDelayTime;
     private float randFloat;
 
-    [SerializeField]private float downGauge;
+    private float downGauge;
     private KnockDownState knockDownState;
     
     private Animator animator;

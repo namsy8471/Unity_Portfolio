@@ -2,9 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.PlayerLoop;
 
-public abstract class Inventory_Base : MonoBehaviour
+public abstract class Inventory_Base : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     protected ItemGrid _itemGrid;
 
@@ -40,8 +41,7 @@ public abstract class Inventory_Base : MonoBehaviour
     {
         return _itemGrid.BoundaryCheck(x, y, selectedItemWidth, selectedItemHeight);
     }
-
-
+    
     public Vector2Int GetTileGridPosition(Vector3 position)
     {
         return _itemGrid.GetTileGridPosition(position);
@@ -55,5 +55,13 @@ public abstract class Inventory_Base : MonoBehaviour
     public Vector3 CalculatePositionOnGrid(InventoryItem targetItem, int x, int y)
     {
         return _itemGrid.CalculatePositionOnGrid(targetItem, x, y);
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.XR;
 
-public class EnemyAttackState : MonoBehaviour, IStateBase
+public class EnemyAttackState : IStateBase
 {
     enum AttackType
     {
@@ -16,49 +16,46 @@ public class EnemyAttackState : MonoBehaviour, IStateBase
         AtkFinish
     }
 
-    private AttackType attackType;
+    private AttackType _attackType;
 
-    private Animator animator;
-    private GameObject player;
+    private Animator _animator;
+    private GameObject _player;
     
-    private float attackRange;
-    [SerializeField] private int maxAttackCount;
-    private float attackDownGauge;
-    private int attackCount;
-    private float attackTimer;
-    private float attackDelay;
-    private float lastAttackDelay;
+    private float _attackRange;
+    private int _maxAttackCount;
+    private float _attackDownGauge;
+    private int _attackCount;
+    private float _attackTimer;
+    private float _attackDelay;
+    private float _lastAttackDelay;
 
-    private bool isAtkFinished;
-    
-    void Start()
-    {
-        attackRange = 2;
-        maxAttackCount = 3;
-        attackDownGauge = 100 / (float) maxAttackCount + 1;
-        
-        attackCount = 0;
-        attackTimer = 0;
-        
-        attackDelay = 0.8f;
-        lastAttackDelay = 3.0f;
+    private bool _isAtkFinished;
 
-        isAtkFinished = false;
+    private GameObject _controller;
 
-        
-        animator = GetComponentInChildren<Animator>();
-        player = GameObject.FindGameObjectWithTag("Player");
-    }
-
+    public EnemyAttackState(GameObject go) => _controller = go;
     public void Init()
     {
-        throw new NotImplementedException();
+        _attackRange = 2;
+        _maxAttackCount = 3;
+        _attackDownGauge = 100 / (float) _maxAttackCount + 1;
+        
+        _attackCount = 0;
+        _attackTimer = 0;
+        
+        _attackDelay = 0.8f;
+        _lastAttackDelay = 3.0f;
+
+        _isAtkFinished = false;
+        
+        _animator = _controller.GetComponentInChildren<Animator>();
+        _player = GameObject.FindGameObjectWithTag("Player");
     }
 
     public void StartState()
     {
         // Debug.Log("Enemy Attack State Start!");
-        isAtkFinished = false;
+        _isAtkFinished = false;
         ChangeState(AttackType.Atk1);
     }
 
@@ -66,75 +63,75 @@ public class EnemyAttackState : MonoBehaviour, IStateBase
     {
         // Debug.Log("Enemy Attack State Update!");
 
-        switch (attackType)
+        switch (_attackType)
         {
             case AttackType.Atk1:
                 
-                if (attackCount < maxAttackCount && attackTimer >= attackDelay)
+                if (_attackCount < _maxAttackCount && _attackTimer >= _attackDelay)
                 {
                     ChangeState(AttackType.Atk2);
                     break;
                 }
                 
-                else if (attackCount == maxAttackCount && attackTimer >= lastAttackDelay)
+                else if (_attackCount == _maxAttackCount && _attackTimer >= _lastAttackDelay)
                 {
                     ChangeState(AttackType.AtkFinish);
                     break;
                 }
                 
-                attackTimer += Time.deltaTime;
+                _attackTimer += Time.deltaTime;
                 break;
             case AttackType.Atk2:
                 
-                if (attackCount < maxAttackCount && attackTimer >= attackDelay)
+                if (_attackCount < _maxAttackCount && _attackTimer >= _attackDelay)
                 {
                     ChangeState(AttackType.Atk3);
                     break;
                 }
                 
-                else if (attackCount == maxAttackCount && attackTimer >= lastAttackDelay)
+                else if (_attackCount == _maxAttackCount && _attackTimer >= _lastAttackDelay)
                 {
                     ChangeState(AttackType.AtkFinish);
                     break;
                 }
-                attackTimer += Time.deltaTime;
+                _attackTimer += Time.deltaTime;
                 break;
             case AttackType.Atk3:
                 
-                if (attackCount < maxAttackCount && attackTimer >= attackDelay)
+                if (_attackCount < _maxAttackCount && _attackTimer >= _attackDelay)
                 {
                     ChangeState(AttackType.Atk4);
                     break;
                 }
                 
-                else if (attackCount == maxAttackCount && attackTimer >= lastAttackDelay)
+                else if (_attackCount == _maxAttackCount && _attackTimer >= _lastAttackDelay)
                 {
                     ChangeState(AttackType.AtkFinish);
                     break;
                 }
-                attackTimer += Time.deltaTime;
+                _attackTimer += Time.deltaTime;
                 
                 break;
             case AttackType.Atk4:
                 
-                if (attackCount == maxAttackCount && attackTimer >= lastAttackDelay)
+                if (_attackCount == _maxAttackCount && _attackTimer >= _lastAttackDelay)
                 {
                     ChangeState(AttackType.AtkFinish);
                     break;
                 }
                 
-                attackTimer += Time.deltaTime;
+                _attackTimer += Time.deltaTime;
                 break;
             
             case AttackType.AtkFinish:
 
                 
-                if (attackTimer >= lastAttackDelay)
+                if (_attackTimer >= _lastAttackDelay)
                 {
-                    isAtkFinished = true;
+                    _isAtkFinished = true;
                 }
                 
-                attackTimer += Time.deltaTime;
+                _attackTimer += Time.deltaTime;
                 
                 break;
 
@@ -150,7 +147,7 @@ public class EnemyAttackState : MonoBehaviour, IStateBase
 
     private void Attack()
     {
-        player.SendMessage("GetDamage", attackDownGauge, SendMessageOptions.DontRequireReceiver);
+        _player.SendMessage("GetDamage", _attackDownGauge, SendMessageOptions.DontRequireReceiver);
     }
 
     private void AttackFinish()
@@ -160,12 +157,12 @@ public class EnemyAttackState : MonoBehaviour, IStateBase
 
     public bool GetAtkDone()
     {
-        return isAtkFinished;
+        return _isAtkFinished;
     }
     
     private void ChangeState(AttackType type)
     {
-        switch (attackType)
+        switch (_attackType)
         {
             case AttackType.Atk1:
                 break;
@@ -181,41 +178,41 @@ public class EnemyAttackState : MonoBehaviour, IStateBase
                 break;
         }
 
-        attackType = type;
-        attackTimer = 0;
+        _attackType = type;
+        _attackTimer = 0;
 
-        switch (attackType)
+        switch (_attackType)
         {
             case AttackType.Atk1:
-                attackCount = 1;
-                animator.SetTrigger("Attack1");
+                _attackCount = 1;
+                _animator.SetTrigger("Attack1");
                 Attack();
                 break;
             
             case AttackType.Atk2:
-                attackCount = 2;
-                animator.SetTrigger("Attack2");
+                _attackCount = 2;
+                _animator.SetTrigger("Attack2");
                 Attack();
 
                 break;
             
             case AttackType.Atk3:
-                attackCount = 3;
-                animator.SetTrigger("Attack3");
+                _attackCount = 3;
+                _animator.SetTrigger("Attack3");
                 Attack();
 
                 break;
             
             case AttackType.Atk4:
-                attackCount = 4;
-                animator.SetTrigger("Attack5");
+                _attackCount = 4;
+                _animator.SetTrigger("Attack5");
                 Attack();
 
                 break;
             
             case AttackType.AtkFinish:
-                attackCount = 0;
-                animator.SetTrigger("Buff");
+                _attackCount = 0;
+                _animator.SetTrigger("Buff");
                 
                 break;
             default:
@@ -225,6 +222,6 @@ public class EnemyAttackState : MonoBehaviour, IStateBase
     
     public float GetAttackRange()
     {
-        return attackRange;
+        return _attackRange;
     }
 }

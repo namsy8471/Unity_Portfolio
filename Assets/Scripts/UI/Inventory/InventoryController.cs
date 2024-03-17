@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
-using Random = UnityEngine.Random;
 
 public class InventoryController
 {
@@ -33,6 +32,8 @@ public class InventoryController
 
     private GameObject _itemPrefab;
     private GameObject _dropItemModeling;
+    private GameObject _itemToLoot;
+    
     private Transform _canvasTransform;
     
     private InventoryHighlight _inventoryHighlight = new InventoryHighlight();
@@ -53,6 +54,15 @@ public class InventoryController
         _changeCursorForGrab += Managers.Cursor.ChangeCursorForGrab;
         _changeCursorForGrabbing += Managers.Cursor.ChangeCursorForGrabbing;
         _changeCursorForNormal += Managers.Cursor.BackNormalCursor;
+
+        #region KeyBinding
+
+        Managers.Input.AddAction(Managers.Input.KeyButtonDown, Managers.Input.InventoryItemRotateKey, RotateItem);
+
+        Managers.Input.LMBDown += LeftMouseButtonPress;
+        Managers.Input.RMBDown += UseItem;
+        
+        #endregion
         
         _inventoryHighlight.Init();
         
@@ -64,27 +74,38 @@ public class InventoryController
         LootingItemFromGround();
         ItemDrag();
         
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            RotateItem();
-        }
-        
         HandleHighlight();
-
-        if (_selectedInventory == null) return;
+    }
+    
+    private void LeftMouseButtonPress()
+    {
+        var tileGridPosition = GetTileGridPosition();
         
-        if (Input.GetMouseButtonDown(0))
+        Debug.Log("포지션 = " + tileGridPosition);
+        
+        if (tileGridPosition == new Vector2Int(-1, -1))
         {
-            LeftMouseButtonPress();
+            if (_selectedItem != null)
+            {
+                DropItemOnTheGround();
+            }
+            else
+            {
+                // LootingItemFromGround();
+            }
         }
-
-        if (Input.GetMouseButtonDown(1))
+        else
         {
-            UseItem();
+            if (_selectedItem != null)
+            {
+                PlaceItem(tileGridPosition);
+            }
+            else
+            {
+                PickUpItem(tileGridPosition);
+            }   
         }
     }
-
-    private GameObject _choiceToLoot;
     
     private void LootingItemFromGround()
     {
@@ -92,18 +113,19 @@ public class InventoryController
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         
+        
         if (Physics.Raycast(ray, out RaycastHit hit, 100.0f, 1 << LayerMask.NameToLayer("Item")))
         {
             if (Input.GetMouseButton(0))
             {
                 _changeCursorForGrabbing?.Invoke();
-                _choiceToLoot = hit.transform.gameObject;
-                Managers.Game.Player.GetComponent<PlayerController>().MoveState.DestPos = _choiceToLoot.transform.position;
+                _itemToLoot = hit.transform.gameObject;
+                Managers.Game.Player.GetComponent<PlayerController>().MoveState.DestPos = _itemToLoot.transform.position;
             }
             else
                 _changeCursorForGrab?.Invoke();
             
-            if (_choiceToLoot == hit.transform.gameObject && Vector3.Distance(hit.point, Managers.Game.Player.transform.position) < 1.0f)
+            if (_itemToLoot == hit.transform.gameObject && Vector3.Distance(hit.point, Managers.Game.Player.transform.position) < 1.0f)
             {
                 LootingItem(hit.transform.name);
                 Object.Destroy(hit.transform.gameObject);
@@ -113,15 +135,11 @@ public class InventoryController
         {
             _changeCursorForNormal?.Invoke();
         }
-    
     }
 
     private void RotateItem()
     {
-        if (_selectedItem == null)
-        {
-            return;
-        }
+        if (_selectedItem == null) return;
 
         _selectedItem.Rotate();
     }
@@ -179,30 +197,7 @@ public class InventoryController
         }
     }
 
-    private void LeftMouseButtonPress()
-    {
-        var tileGridPosition = GetTileGridPosition();
 
-        // 인벤토리 밖이라면
-        if (tileGridPosition == new Vector2Int(-1, -1))
-        {
-            if (_selectedItem != null)
-            {
-                DropItemOnTheGround();
-            }
-        }
-        else
-        {
-            if (_selectedItem != null)
-            {
-                PlaceItem(tileGridPosition);
-            }
-            else
-            {
-                PickUpItem(tileGridPosition);
-            }   
-        }
-    }
 
     private Vector2Int GetTileGridPosition()
     {
@@ -262,9 +257,8 @@ public class InventoryController
             }
         }
     }
-    
-    // 아이템 줍기
-    public void LootingItem(string itemName)
+
+    private void LootingItem(string itemName)
     {
         GameObject pickUpItemInstance = GameObject.Instantiate(new GameObject { name = $"{itemName} Icon" });
         InventoryItem pickedUpItem = pickUpItemInstance.AddComponent<InventoryItem>();
@@ -290,12 +284,20 @@ public class InventoryController
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
+        
         var pos = Vector3.zero;
-
         if (Physics.Raycast(ray, out hit, 100f, 1 << LayerMask.NameToLayer("Ground")))
+        {
             pos = hit.point;
+            Debug.Log("ㅁㅁ" + hit.transform.gameObject.layer);
+            
+        }
+        else
+        {
+            Debug.Log("다른 레이어에 명중 : layernumber = " + hit.transform.gameObject.layer);
+        }
 
-        if (Vector3.Distance(pos, GameObject.Find("Player").transform.position) > 1f) return;
+        if (Vector3.Distance(pos, Managers.Game.Player.transform.position) > 1f) return;
             
         pos.y = _selectedItem.ItemData.GroundYOffset;
         
@@ -312,13 +314,13 @@ public class InventoryController
         _selectedItem = null;
     }
 
-    // 아이템 사용
-    public void UseItem()
+    private void UseItem()
     {
+        if (_itemToHighlight == null) return;
+        
         _itemToHighlight.ItemData.UseItem();
     }
     
-    // 아이템 삭제용 샌드메시지
     public void DeleteItemInHighlight()
     {
         GameObject.Destroy(_itemToHighlight.gameObject);
@@ -338,5 +340,4 @@ public class InventoryController
         _selectedItem = inventoryItem;
         _rectTransform = _selectedItem.GetComponent<RectTransform>();
     }
-    
 }

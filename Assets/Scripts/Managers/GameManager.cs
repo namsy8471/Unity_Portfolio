@@ -55,7 +55,9 @@ public class GameManager
         _isInventoryClosed = !_isInventoryClosed;
         foreach (var inven in _inventories)
         {
-            inven.gameObject.transform.root.gameObject.SetActive(_isInventoryClosed);
+            inven.gameObject.transform.parent.gameObject.SetActive(_isInventoryClosed);
+            Managers.Input.RemovePlayerMouseActions();
+            Managers.Input.RollbackPlayerMouseActions();
         }
     }
 }

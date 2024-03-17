@@ -1,8 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.XR;
 using Random = UnityEngine.Random;
 
 public class EnemyFSM : MonoBehaviour
@@ -24,38 +23,47 @@ public class EnemyFSM : MonoBehaviour
     [SerializeField] private EnemyState enemyState;
     [SerializeField] private BattleState battleState;
     
-    private EnemyIdleState enemyIdleState;
-    private EnemyMoveState enemyMoveState;
-    private EnemyAttackState enemyAttackState;
-    private EnemyGetDamageState enemyGetDamageState;
-
-    private Animator animator;
-    private SphereCollider detectCol;
+    private EnemyIdleState _idleState;
+    private EnemyMoveState _moveState;
+    private EnemyAttackState _attackState;
+    private EnemyGetDamageState _getDamageState;
     
-    private GameObject player;
-    private Transform tr;
+    private Animator _animator;
+    private SphereCollider _detectCol;
+    
+    private GameObject _player;
+    private Transform _tr;
 
-    private float petrolTimer;
-    private bool playerInRange;
+    private float _petrolTimer;
+    private bool _playerInRange;
+    
     void Start()
     {
-        enemyIdleState = GetComponent<EnemyIdleState>();
-        enemyMoveState = GetComponent<EnemyMoveState>();
-        enemyAttackState = GetComponent<EnemyAttackState>();
-        enemyGetDamageState = GetComponent<EnemyGetDamageState>();
+        _animator = GetComponentInChildren<Animator>();
+
+        _detectCol = GetComponentInChildren<SphereCollider>();
+        GetComponentInChildren<EnemyDetectingBoundary>().TriggerEnter += OnTriggerEnterInDetectingCollider;
+        GetComponentInChildren<EnemyDetectingBoundary>().TriggerExit += OnTriggerExitFromDetectingCollider;
         
-        animator = GetComponentInChildren<Animator>();
-        detectCol = GetComponent<SphereCollider>();
-        
-        player = GameObject.FindGameObjectWithTag("Player");
-        tr = GetComponent<Transform>();
+        _player = Managers.Game.Player;
+        _tr = GetComponent<Transform>();
         
         enemyState = EnemyState.Idle;
         battleState = BattleState.Idle;
-        animator.SetBool("Idle",true);
+        _animator.SetBool("Idle",true);
 
-        petrolTimer = 0;
-        playerInRange = false;
+        _petrolTimer = 0;
+        _playerInRange = false;
+        
+        _idleState = new EnemyIdleState(gameObject);
+        _moveState = new EnemyMoveState(gameObject);
+        _attackState = new EnemyAttackState(gameObject);
+        _getDamageState = new EnemyGetDamageState(gameObject);
+        
+        _idleState.Init();
+        _moveState.Init();
+        _attackState.Init();
+        _getDamageState.Init();
     }
 
     void Update()
@@ -65,42 +73,42 @@ public class EnemyFSM : MonoBehaviour
         switch (enemyState)
         {
             case EnemyState.Idle:
-                if (petrolTimer > 3)
+                if (_petrolTimer > 3)
                 {
-                    petrolTimer = 0;
+                    _petrolTimer = 0;
                     ChangeState(EnemyState.Move);
                     break;
                 }
                 
                 StartCoroutine("CheckAttackRange");
-                if (playerInRange)
+                if (_playerInRange)
                 {
                     StopCoroutine("CheckAttackRange");
                     ChangeState(EnemyState.Attack);
                     break;
                 }
 
-                petrolTimer += Time.deltaTime;
-                enemyIdleState.UpdateState();
+                _petrolTimer += Time.deltaTime;
+                _idleState.UpdateState();
                 break;
             
             case EnemyState.Attack:
 
                 StartCoroutine("CheckAttackRange");
                 
-                if (!playerInRange && enemyAttackState.GetAtkDone())
+                if (!_playerInRange && _attackState.GetAtkDone())
                 {
                     StopCoroutine("CheckAttackRange");
                     ChangeState(EnemyState.Move);
                     break;
                 }
                 
-                enemyAttackState.UpdateState();
+                _attackState.UpdateState();
                 break;
             
             case EnemyState.GetDamage:
                 
-                enemyGetDamageState.UpdateState();
+                _getDamageState.UpdateState();
                 break;
             
             default:
@@ -114,7 +122,7 @@ public class EnemyFSM : MonoBehaviour
         switch (enemyState)
         {
             case EnemyState.Move:
-                if (enemyMoveState.GetPatrolDone())
+                if (_moveState.GetPatrolDone())
                 {
                     ChangeState(EnemyState.Idle);
                     break;
@@ -122,14 +130,14 @@ public class EnemyFSM : MonoBehaviour
 
                 StartCoroutine("CheckAttackRange");
                 
-                if (playerInRange)
+                if (_playerInRange)
                 {
                     StopCoroutine("CheckAttackRange");
                     ChangeState(EnemyState.Attack);
                     break;
                 } 
                 
-                enemyMoveState.UpdateState();
+                _moveState.UpdateState();
                 break;
         }
     }
@@ -139,16 +147,16 @@ public class EnemyFSM : MonoBehaviour
         switch (enemyState)
         {
             case EnemyState.Idle:
-                enemyIdleState.EndState();
+                _idleState.EndState();
                 break;
             case EnemyState.Move:
-                enemyMoveState.EndState();
+                _moveState.EndState();
                 break;
             case EnemyState.Attack:
-                enemyAttackState.EndState();
+                _attackState.EndState();
                 break;
             case EnemyState.GetDamage:
-                enemyGetDamageState.EndState();
+                _getDamageState.EndState();
                 break;
             default:
                 break;
@@ -159,16 +167,16 @@ public class EnemyFSM : MonoBehaviour
         switch (enemyState)
         {
             case EnemyState.Idle:
-                enemyIdleState.StartState();
+                _idleState.StartState();
                 break;
             case EnemyState.Move:
-                enemyMoveState.StartState();
+                _moveState.StartState();
                 break;
             case EnemyState.Attack:
-                enemyAttackState.StartState();
+                _attackState.StartState();
                 break;
             case EnemyState.GetDamage:
-                enemyGetDamageState.StartState();
+                _getDamageState.StartState();
                 break;
             default:
                 break;
@@ -180,7 +188,7 @@ public class EnemyFSM : MonoBehaviour
         switch (battleState)
         {
             case BattleState.Idle:
-                animator.SetBool("Idle", false);
+                _animator.SetBool("Idle", false);
                 break;
             case BattleState.Battle:
                 break;
@@ -193,50 +201,13 @@ public class EnemyFSM : MonoBehaviour
         switch (battleState)
         {
             case BattleState.Idle:
-                animator.SetBool("Idle", true);
+                _animator.SetBool("Idle", true);
                 break;
             case BattleState.Battle:
-                animator.SetTrigger("Buff");
+                _animator.SetTrigger("Buff");
                 break;
             default:
                 break;
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player") && battleState == BattleState.Idle)
-        {
-            Debug.Log("플레이어 탐지!");
-            var playerPos = player.transform.position;
-            var position = tr.position;
-            playerPos.y = position.y;
-        
-            var dir = playerPos - position;
-        
-            tr.LookAt(playerPos);
-            
-            enemyMoveState.SetFindPlayer(true);
-            
-            ChangeState(EnemyState.Idle);
-            ChangeState(BattleState.Battle);
-            Invoke(nameof(ChangeStateToMove), Random.Range(1, 5));
-
-            detectCol.radius = 15f;
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player") && battleState == BattleState.Battle)
-        {
-            Debug.Log("플레이어 놓침");
-            
-            enemyMoveState.SetFindPlayer(false);
-            ChangeState(BattleState.Idle);
-            ChangeState(EnemyState.Idle);
-
-            detectCol.radius = 7f;
         }
     }
 
@@ -244,16 +215,16 @@ public class EnemyFSM : MonoBehaviour
     {
         while (true)
         {
-            playerInRange =
-                Vector3.Distance(player.transform.position, tr.position) <= enemyAttackState.GetAttackRange();
+            _playerInRange =
+                Vector3.Distance(_player.transform.position, _tr.position) <= _attackState.GetAttackRange();
 
             yield return new WaitForSeconds(0.1f);
         }
     }
     private void ChangeStateToMove()
     {
-            animator.SetTrigger("Buff End");
-            ChangeState(EnemyState.Move);
+        _animator.SetTrigger("Buff End");
+        ChangeState(EnemyState.Move);
     }
     
     private void GetDamage(float value)
@@ -266,5 +237,37 @@ public class EnemyFSM : MonoBehaviour
     private void BackToIdle()
     {
         ChangeState(EnemyState.Idle);
+    }
+    
+    private void OnTriggerEnterInDetectingCollider(Collider other)
+    {
+        if (other.CompareTag("Player") && battleState == BattleState.Idle)
+        {
+            var playerPos = _player.transform.position;
+            var position = _tr.position;
+            playerPos.y = position.y;
+            
+            _tr.LookAt(playerPos);
+            
+            _moveState.SetFindPlayer(true);
+            
+            ChangeState(EnemyState.Idle);
+            ChangeState(BattleState.Battle);
+            Invoke(nameof(ChangeStateToMove), Random.Range(1, 5));
+
+            _detectCol.radius = 15f;
+        }
+    }
+
+    private void OnTriggerExitFromDetectingCollider(Collider other)
+    {
+        if (other.CompareTag("Player") && battleState == BattleState.Battle)
+        {
+            _moveState.SetFindPlayer(false);
+            ChangeState(BattleState.Idle);
+            ChangeState(EnemyState.Idle);
+
+            _detectCol.radius = 7f;
+        }
     }
 }

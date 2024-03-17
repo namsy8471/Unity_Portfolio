@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyGetDamageState : MonoBehaviour, IStateBase
+public class EnemyGetDamageState : IStateBase
 {
     private enum KnockDownState
     {
@@ -20,21 +20,19 @@ public class EnemyGetDamageState : MonoBehaviour, IStateBase
     
     private Animator animator;
     private Rigidbody rb;
-    
-    private void Start()
+
+    private GameObject _controller;
+
+    public EnemyGetDamageState(GameObject go) => _controller = go;
+    public void Init()
     {
-        animator = GetComponentInChildren<Animator>();
-        rb = GetComponent<Rigidbody>();
+        animator = _controller.GetComponentInChildren<Animator>();
+        rb = _controller.GetComponent<Rigidbody>();
         
         downGauge = 0.0f;
 
         getDelayTime = 0.8f;
         downDelayTime = 2.6f;
-    }
-
-    public void Init()
-    {
-        throw new System.NotImplementedException();
     }
 
     public void StartState()
@@ -64,7 +62,7 @@ public class EnemyGetDamageState : MonoBehaviour, IStateBase
 
                 if (timer >= getDelayTime)
                 {
-                    gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
+                    // gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
                     break;
                 }
                 break;
@@ -72,7 +70,7 @@ public class EnemyGetDamageState : MonoBehaviour, IStateBase
                 
                 if (timer >= downDelayTime)
                 {
-                    gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
+                    // gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
                     break;
                 }
                 break;

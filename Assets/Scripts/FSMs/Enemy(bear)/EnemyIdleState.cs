@@ -2,34 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyIdleState : MonoBehaviour, IStateBase
+public class EnemyIdleState : IStateBase
 {
-    private Animator animator;
-    // Start is called before the first frame update
-    void Start()
-    {
-        animator = GetComponentInChildren<Animator>();
-    }
-
+    private Animator _animator;
+    private GameObject _controller;
+    public EnemyIdleState(GameObject go) => _controller = go;
+    
     public void Init()
     {
-        throw new System.NotImplementedException();
+        _animator = _controller.GetComponentInChildren<Animator>();
     }
 
     public void StartState()
     {
-        // Debug.Log("Enemy Idle Start");
-        animator.SetBool("Idle", true);
+        _animator.SetBool("Idle", true);
     }
 
     public void UpdateState()
     {
-        // Debug.Log("Enemy Idle Update");
+        
     }
 
     public void EndState()
     {
-        // Debug.Log("Enemy Idle End");
-        animator.SetBool("Idle", false);
+        _animator.SetBool("Idle", false);
     }
 }

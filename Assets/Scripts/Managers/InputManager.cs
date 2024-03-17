@@ -20,20 +20,24 @@ public class InputManager
     #region KeyCodes and properties
 
     private KeyCode _inventoryKeyCode;
+    private KeyCode _inventoryItemRotateKeyCode;
     private KeyCode _postureChangeKeyCode;
-    private KeyCode _walkOrRunningChangeKeyCode;
 
     private KeyCode _moveForwardKeyCode;
     private KeyCode _moveBackwardKeyCode;
     private KeyCode _moveLeftKeyCode;
     private KeyCode _moveRightKeyCode;
     private KeyCode _walkKeyCode;
+    
     public KeyCode InventoryKey => _inventoryKeyCode;
+    public KeyCode InventoryItemRotateKey => _inventoryItemRotateKeyCode;
     public KeyCode PostureChangeKey => _postureChangeKeyCode;
+    
     public KeyCode MoveForwardKey => _moveForwardKeyCode;
     public KeyCode MoveBackwardKey => _moveBackwardKeyCode;
     public KeyCode MoveLeftKey => _moveLeftKeyCode;
     public KeyCode MoveRightKey => _moveRightKeyCode;
+    
     public KeyCode WalkKey => _walkKeyCode;
     
     #endregion
@@ -43,6 +47,8 @@ public class InputManager
     public void Init()
     {
         _inventoryKeyCode = KeyCode.I;
+        _inventoryItemRotateKeyCode = KeyCode.R;
+        
         _postureChangeKeyCode = KeyCode.Space;
 
         _moveForwardKeyCode = KeyCode.W;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class EnemyMoveState : MonoBehaviour, IStateBase
+public class EnemyMoveState : IStateBase
 {
     enum WalkType
     {
@@ -25,84 +25,82 @@ public class EnemyMoveState : MonoBehaviour, IStateBase
         Finish
     }
     
-    private WalkType walkType;
-    private MovingState moveState;
-    private PatrolState patrolState;
+    private WalkType _walkType;
+    private MovingState _moveState;
+    private PatrolState _patrolState;
     
-    private GameObject player;
-    private Animator animator;
+    private GameObject _player;
+    private Animator _animator;
+    private GameObject _controller;
     
-    private Transform tr;
-    private Rigidbody rb;
+    private Transform _tr;
+    private Rigidbody _rb;
     
     // 속도 관련 변수들
-    [SerializeField]private float walkSpeedOffset = 100f;
-    [SerializeField]private float runSpeedOffset = 500f;
+    private float _walkSpeedOffset = 100f;
+    private float _runSpeedOffset = 500f;
 
-    [SerializeField] private float speed = 100f;
+    private float _speed = 100f;
 
     
     // 주변 배회 관련 변수들
-    private float patrolTimer;
-    private float randomPatrolTime;
+    private float _patrolTimer;
+    private float _randomPatrolTime;
     
-    private bool patrolDone;
-    private bool isFindPlayer;
+    private bool _patrolDone;
+    private bool _isFindPlayer;
 
-    private Vector3 randDirection;
+    private Vector3 _randDirection;
+
+    public EnemyMoveState(GameObject go) => _controller = go;
     
-    void Start()
-    {
-        player = GameObject.FindGameObjectWithTag("Player");
-        animator = GetComponentInChildren<Animator>();
-        tr = GetComponent<Transform>();
-        rb = GetComponent<Rigidbody>();
-
-        patrolDone = false;
-        isFindPlayer = false;
-    }
-
     public void Init()
     {
-        throw new NotImplementedException();
+        _player = GameObject.FindGameObjectWithTag("Player");
+        _animator = _controller.GetComponentInChildren<Animator>();
+        _tr = _controller.GetComponent<Transform>();
+        _rb = _controller.GetComponent<Rigidbody>();
+
+        _patrolDone = false;
+        _isFindPlayer = false;
     }
 
     public void StartState()
     {
         // Debug.Log("Enemy Move State Update");
 
-        ChangeState(isFindPlayer ? MovingState.Player : MovingState.Patrol);
+        ChangeState(_isFindPlayer ? MovingState.Player : MovingState.Patrol);
         ChangeState(WalkType.Walk);
         
-        patrolTimer = 0;
-        patrolDone = false;
-        randomPatrolTime = Random.Range(1, 4);
+        _patrolTimer = 0;
+        _patrolDone = false;
+        _randomPatrolTime = Random.Range(1, 4);
     }
 
     public void UpdateState()
     {
         // Debug.Log("Enemy Move State Update");
 
-        switch (moveState)
+        switch (_moveState)
         {
             case MovingState.Patrol:
-                switch (patrolState)
+                switch (_patrolState)
                 {
                     case PatrolState.SetRandPos:
-                        randDirection = new Vector3(Random.value * 2 - 1, 0 , Random.value * 2 - 1).normalized;
+                        _randDirection = new Vector3(Random.value * 2 - 1, 0 , Random.value * 2 - 1).normalized;
                         
-                        patrolState = PatrolState.Move;
+                        _patrolState = PatrolState.Move;
                         break;
                     
                     case PatrolState.Move:
-                        if (patrolTimer > randomPatrolTime)
+                        if (_patrolTimer > _randomPatrolTime)
                         {
-                            patrolTimer = 0;
-                            patrolState = PatrolState.Finish;
+                            _patrolTimer = 0;
+                            _patrolState = PatrolState.Finish;
                             break;
                         }
 
-                        patrolTimer += Time.deltaTime;
+                        _patrolTimer += Time.deltaTime;
                         Patrol();
                         break;
                     
@@ -120,12 +118,12 @@ public class EnemyMoveState : MonoBehaviour, IStateBase
             default:
                 break;
         }
-        switch (walkType)
+        switch (_walkType)
         {
             case WalkType.Walk:
             {
                 float percent = Random.Range(0, 301) / 300f;
-                if (moveState == MovingState.Player && percent < 0.002f)
+                if (_moveState == MovingState.Player && percent < 0.002f)
                 {
                     ChangeState(WalkType.Run);
                     break;
@@ -144,56 +142,56 @@ public class EnemyMoveState : MonoBehaviour, IStateBase
     {
         // Debug.Log("Enemy Move State End!");
 
-        rb.velocity = Vector3.zero;
-        animator.SetBool("WalkForward", false);
-        animator.SetBool("Run Forward", false);
+        _rb.velocity = Vector3.zero;
+        _animator.SetBool("WalkForward", false);
+        _animator.SetBool("Run Forward", false);
     }
 
     void Patrol()
     {
-        var lookDir = randDirection + tr.position;
-        tr.LookAt(lookDir);
-        rb.velocity = randDirection * (speed * Time.deltaTime);
+        var lookDir = _randDirection + _tr.position;
+        _tr.LookAt(lookDir);
+        _rb.velocity = _randDirection * (_speed * Time.deltaTime);
     }
     
     void Chase()
     {
-        var playerPos = player.transform.position;
-        var pos = tr.position;
+        var playerPos = _player.transform.position;
+        var pos = _tr.position;
         playerPos.y = pos.y;
         
         var dir = playerPos - pos;
         
-        tr.LookAt(playerPos);
-        rb.velocity = dir.normalized * (speed * Time.deltaTime);
+        _tr.LookAt(playerPos);
+        _rb.velocity = dir.normalized * (_speed * Time.deltaTime);
     }
     
     void ChangeState(WalkType state)
     {
-        switch (walkType)
+        switch (_walkType)
         {
             case WalkType.Walk:
-                animator.SetBool("WalkForward", false);
+                _animator.SetBool("WalkForward", false);
                 break;
             case WalkType.Run:
-                animator.SetBool("Run Forward", false);
+                _animator.SetBool("Run Forward", false);
 
                 break;
             default:
                 break;
         }
 
-        walkType = state;
+        _walkType = state;
 
-        switch (walkType)
+        switch (_walkType)
         {
             case WalkType.Walk:
-                animator.SetBool("WalkForward", true);
-                speed = walkSpeedOffset;
+                _animator.SetBool("WalkForward", true);
+                _speed = _walkSpeedOffset;
                 break;
             case WalkType.Run:
-                animator.SetBool("Run Forward", true);
-                speed = runSpeedOffset;
+                _animator.SetBool("Run Forward", true);
+                _speed = _runSpeedOffset;
                 break;
             default:
                 break;
@@ -202,7 +200,7 @@ public class EnemyMoveState : MonoBehaviour, IStateBase
 
     void ChangeState(MovingState state)
     {
-        switch (moveState)
+        switch (_moveState)
         {
             case MovingState.Patrol:
                 break;
@@ -212,9 +210,9 @@ public class EnemyMoveState : MonoBehaviour, IStateBase
                 break;
         }
 
-        moveState = state;
+        _moveState = state;
 
-        switch (moveState)
+        switch (_moveState)
         {
             case MovingState.Patrol:
                 break;
@@ -227,17 +225,17 @@ public class EnemyMoveState : MonoBehaviour, IStateBase
 
     void PatrolDone()
     {
-        patrolState = PatrolState.SetRandPos;
-        patrolDone = true;
+        _patrolState = PatrolState.SetRandPos;
+        _patrolDone = true;
     }
 
     public bool GetPatrolDone()
     {
-        return patrolDone;
+        return _patrolDone;
     }
 
     public void SetFindPlayer(bool value)
     {
-        isFindPlayer = value;
+        _isFindPlayer = value;
     }
 }

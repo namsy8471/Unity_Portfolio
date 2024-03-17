@@ -18,13 +18,14 @@ public class ItemData : ScriptableObject
     [SerializeField] private GameObject itemModelingForDropping;
     [SerializeField] private GameObject itemModelingForEquipment;
     [SerializeField] private float groundYOffset;
-    
+
     public Sprite ItemIcon => itemIcon;
     public string ItemName => itemName;
     public GameObject ItemModelingForDropping => itemModelingForDropping;
     public GameObject ItemModelingForEquipment => itemModelingForEquipment;
     public float GroundYOffset => groundYOffset;
-    
+    public InventoryController InventoryController => Managers.Game.InventoryController;
+
     // 이미지 크기
     public void GetImageSize(out int x, out int y)
     {

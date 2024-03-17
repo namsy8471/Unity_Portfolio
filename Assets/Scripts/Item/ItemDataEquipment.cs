@@ -21,10 +21,10 @@ public class ItemDataEquipment : ItemData
     public Type EquipmentType => type;
     
     // 무기 능력치
-    [SerializeField] private float minAtk;
-    [SerializeField] private float maxAtk;
-    [SerializeField] private float def;
-    [SerializeField] private float durability;
+    private float minAtk;
+    private float maxAtk;
+    private float def;
+    private float durability;
     
     public override void Init()
     {

@@ -7,16 +7,15 @@ using UnityEngine;
 [CreateAssetMenu]
 public class ItemDataPotion : ItemData
 {
-    private InventoryController inventoryController;
     public override void Init()
     {
-        inventoryController = Managers.Game.InventoryController;
+        
     }
 
     public override void UseItem()
     {
         Debug.Log("HP 회복!");
-        inventoryController.DeleteItemInHighlight();
+        InventoryController.DeleteItemInHighlight();
     }
 
     public override void DropItem()

@@ -214,15 +214,17 @@ public class MoveState : IStateBase
         RaycastHit hit;
 
         LayerMask layerMask = 1 << LayerMask.NameToLayer("Ground") |
-                               1 << LayerMask.NameToLayer("Enemy") |
-                               1 << LayerMask.NameToLayer("Item");
+                                 1 << LayerMask.NameToLayer("Enemy") |
+                                 1 << LayerMask.NameToLayer("Item");
         
         if (Physics.Raycast(ray, out hit, 1000f, layerMask))
         {
             _destPos = hit.point;
             
-            if (hit.transform.gameObject.layer == 1 << LayerMask.NameToLayer("Enemy") || hit.transform.gameObject.layer == 1 << LayerMask.NameToLayer("Item"))
+            if ((hit.transform.gameObject.layer == 1 << LayerMask.NameToLayer("Enemy") && !hit.collider.isTrigger) ||
+                hit.transform.gameObject.layer == 1 << LayerMask.NameToLayer("Item"))
                 _targetingSystem.Target = hit.transform.gameObject;
+            
             else _targetingSystem.Target = null;
         }
     }
