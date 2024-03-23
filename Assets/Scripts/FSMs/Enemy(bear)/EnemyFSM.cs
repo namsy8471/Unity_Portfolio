@@ -68,8 +68,6 @@ public class EnemyFSM : MonoBehaviour
 
     void Update()
     {
-        Debug.Log("적 FSM = " + enemyState);
-        
         switch (enemyState)
         {
             case EnemyState.Idle:
@@ -80,10 +78,8 @@ public class EnemyFSM : MonoBehaviour
                     break;
                 }
                 
-                StartCoroutine("CheckAttackRange");
                 if (_playerInRange)
                 {
-                    StopCoroutine("CheckAttackRange");
                     ChangeState(EnemyState.Attack);
                     break;
                 }
@@ -94,11 +90,8 @@ public class EnemyFSM : MonoBehaviour
             
             case EnemyState.Attack:
 
-                StartCoroutine("CheckAttackRange");
-                
                 if (!_playerInRange && _attackState.GetAtkDone())
                 {
-                    StopCoroutine("CheckAttackRange");
                     ChangeState(EnemyState.Move);
                     break;
                 }
@@ -119,6 +112,8 @@ public class EnemyFSM : MonoBehaviour
 
     private void FixedUpdate()
     {
+        _playerInRange = Vector3.Distance(_player.transform.position, _tr.position) <= _attackState.GetAttackRange();
+        
         switch (enemyState)
         {
             case EnemyState.Move:
@@ -128,11 +123,8 @@ public class EnemyFSM : MonoBehaviour
                     break;
                 }
 
-                StartCoroutine("CheckAttackRange");
-                
                 if (_playerInRange)
                 {
-                    StopCoroutine("CheckAttackRange");
                     ChangeState(EnemyState.Attack);
                     break;
                 } 
@@ -211,16 +203,6 @@ public class EnemyFSM : MonoBehaviour
         }
     }
 
-    IEnumerator CheckAttackRange()
-    {
-        while (true)
-        {
-            _playerInRange =
-                Vector3.Distance(_player.transform.position, _tr.position) <= _attackState.GetAttackRange();
-
-            yield return new WaitForSeconds(0.1f);
-        }
-    }
     private void ChangeStateToMove()
     {
         _animator.SetTrigger("Buff End");
@@ -229,7 +211,6 @@ public class EnemyFSM : MonoBehaviour
     
     private void GetDamage(float value)
     {
-        // Debug.Log("GetDamage 매소드 작동");
         ChangeState(EnemyState.GetDamage);
         gameObject.SendMessage("AddDownGauge", value, SendMessageOptions.DontRequireReceiver);
     }

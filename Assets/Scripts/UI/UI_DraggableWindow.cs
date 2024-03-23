@@ -14,8 +14,8 @@ public class UI_DraggableWindow : UI_PopUp
     {
         base.Init();
         
-        changeMouseCursorToGrabbing += Managers.Cursor.ChangeCursorForGrabbing;
-        changeMouseCursorToNormal += Managers.Cursor.BackNormalCursor;
+        changeMouseCursorToGrabbing += Managers.Graphics.Cursor.ChangeCursorForGrabbing;
+        changeMouseCursorToNormal += Managers.Graphics.Cursor.BackNormalCursor;
     }
 
     public override void OnDrag(PointerEventData eventData)

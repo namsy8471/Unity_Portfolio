@@ -8,18 +8,20 @@ public class Managers : MonoBehaviour
     private static Managers _instance = null;
     static Managers Instance { get { Init(); return _instance; } }
     
-    private GameManager _game = new GameManager();
-    private CursorManager _cursor = new CursorManager();
-    private SoundManager _sound = new SoundManager();
-    private ParticleManager _particle = new ParticleManager();
     private InputManager _input = new InputManager();
-    
-    public static GameManager Game => Instance._game;
-    public static CursorManager Cursor => Instance._cursor;
-    public static SoundManager Sound => Instance._sound;
-    public static ParticleManager Particle => Instance._particle;
+    private SoundManager _sound = new SoundManager();
+    private GraphicsManager _graphics = new GraphicsManager();
+    private RayManager _ray = new RayManager();
+    private GameManager _game = new GameManager();
+
     public static InputManager Input => Instance._input;
+    public static SoundManager Sound => Instance._sound;
+    public static GraphicsManager Graphics => Instance._graphics;
+    public static RayManager Ray => Instance._ray;
+    public static GameManager Game => Instance._game;
     
+    public static GameObject ManagersGO { get; private set; }
+
     private void Start()
     {
         Init();
@@ -29,27 +31,30 @@ public class Managers : MonoBehaviour
     {
         if (_instance == null)
         {
-            GameObject obj = GameObject.Find("@Managers");
-            if (obj == null)
+            ManagersGO = GameObject.Find("@Managers");
+            if (ManagersGO == null)
             {
-                obj = new GameObject { name = "@Managers" };
-                obj.AddComponent<Managers>();
+                ManagersGO = new GameObject { name = "@Managers" };
+                ManagersGO.AddComponent<Managers>();
             }
             
-            DontDestroyOnLoad(obj);
-            _instance = obj.GetComponent<Managers>();
+            DontDestroyOnLoad(ManagersGO);
+            _instance = ManagersGO.GetComponent<Managers>();
             
             Input.Init();
-            Cursor.Init();
-            Game.Init();
             Sound.Init();
-            Particle.Init();
+            Graphics.Init();
+            Ray.Init();
+            
+            Game.Init();
         }
     }
 
     private void Update()
     {
         Input.Update();
+        Ray.Update();
+        
         Game.Update();
     }
 }

@@ -12,4 +12,13 @@ public class Util
 
         return component;
     }
+    
+    public static bool IsMousePointerOutOfScreen()
+    {
+        Vector2 mousePos = Input.mousePosition;
+        if(mousePos.x < 0 || mousePos.y < 0 || Screen.width < mousePos.x || Screen.height < mousePos.y)
+            return true;
+        
+        return false;
+    }
 }

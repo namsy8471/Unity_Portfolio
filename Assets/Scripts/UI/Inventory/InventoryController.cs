@@ -51,9 +51,9 @@ public class InventoryController
         _itemData.Add("LongSword", Resources.Load<ItemData>("ItemData/LongSword"));
         _itemData.Add("ShortSword", Resources.Load<ItemData>("ItemData/ShortSword"));
         
-        _changeCursorForGrab += Managers.Cursor.ChangeCursorForGrab;
-        _changeCursorForGrabbing += Managers.Cursor.ChangeCursorForGrabbing;
-        _changeCursorForNormal += Managers.Cursor.BackNormalCursor;
+        _changeCursorForGrab += Managers.Graphics.Cursor.ChangeCursorForGrab;
+        _changeCursorForGrabbing += Managers.Graphics.Cursor.ChangeCursorForGrabbing;
+        _changeCursorForNormal += Managers.Graphics.Cursor.BackNormalCursor;
 
         #region KeyBinding
 

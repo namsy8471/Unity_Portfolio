@@ -54,15 +54,12 @@ public class EnemyAttackState : IStateBase
 
     public void StartState()
     {
-        // Debug.Log("Enemy Attack State Start!");
         _isAtkFinished = false;
         ChangeState(AttackType.Atk1);
     }
 
     public void UpdateState()
     {
-        // Debug.Log("Enemy Attack State Update!");
-
         switch (_attackType)
         {
             case AttackType.Atk1:

@@ -28,6 +28,8 @@ public class InputManager
     private KeyCode _moveLeftKeyCode;
     private KeyCode _moveRightKeyCode;
     private KeyCode _walkKeyCode;
+
+    private KeyCode _targetingKeyCode;
     
     public KeyCode InventoryKey => _inventoryKeyCode;
     public KeyCode InventoryItemRotateKey => _inventoryItemRotateKeyCode;
@@ -39,6 +41,8 @@ public class InputManager
     public KeyCode MoveRightKey => _moveRightKeyCode;
     
     public KeyCode WalkKey => _walkKeyCode;
+
+    public KeyCode TargetingKey => _targetingKeyCode;
     
     #endregion
 
@@ -57,6 +61,8 @@ public class InputManager
         _moveRightKeyCode = KeyCode.D;
 
         _walkKeyCode = KeyCode.LeftShift;
+
+        _targetingKeyCode = KeyCode.LeftControl;
     }
 
     public void Update()

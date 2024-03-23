@@ -61,8 +61,6 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log("플레이어 FSM = " + currentState);
-
         switch (currentState)
         {
             case PlayerState.Idle:

@@ -32,7 +32,6 @@ public class CursorManager
     {
         Cursor.SetCursor(grabCursor, new Vector2(grabCursor.width / 2, grabCursor.height / 2), CursorMode.Auto);
         isDrag = false;
-        Debug.Log("IsDrag = " + isDrag);
     }
     
     public void ChangeCursorForGrabbing()
@@ -42,14 +41,11 @@ public class CursorManager
         {
             isDrag = true;
         }
-
-        Debug.Log("IsDrag = " + isDrag);
     }
 
     public void BackNormalCursor()
     {
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
         isDrag = false;
-        Debug.Log("IsDrag = " + isDrag);
     }
 }
