@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.Rendering;
 
 public class VisualManager
 {
@@ -11,35 +11,22 @@ public class VisualManager
 
     private GameObject _imageCanvas;
     
-    private GameObject mouseClickParticlePrefab;
-    private GameObject _mouseClickParticle;
-    
-    private LineRenderer _lineRenderer;          // 마우스와 적이 이어지는 라인 그리기
+    private LineRenderer _lineRenderer;
     
     private GameObject _circleImage;
     private float _circleSize = 50f;
+    private float _rotationOffset = 0;
     
-    private float _rotationOffset = 0;           // 원 회전 오프셋
-    ////////////////
     public void Init()
     {
         _imageCanvas = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/UI/ImageCanvas"));
-        _circleImage = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/UI/TargetingCircle/TargetingCircle"), _imageCanvas.transform);
-        
-        _circleImage.SetActive(false);
-        
-        _lineRenderer = Managers.ManagersGO.AddComponent<LineRenderer>();
-        
-        _lineRenderer.startColor = Color.cyan;
-        _lineRenderer.endColor = Color.cyan;
-        _lineRenderer.startWidth = 0.05f;
-        _lineRenderer.endWidth = 0.05f;
-        
-        mouseClickParticlePrefab = Resources.Load<GameObject>("Particles/MouseClickParticle");
+
+        TargetingCircleInit();
+        LineRendererInit();
 
         #region Action Binding
         
-        // This func use in Targeting System.
+        // These functions use in Targeting System.
         Managers.Game.TargetingSystem.SetDrawCircleAction(DrawCircleOnEnemy);
         Managers.Game.TargetingSystem.SetDrawLineAction(DrawLineToEnemy);
         Managers.Game.TargetingSystem.SetClearTargetingCircle(ClearTargetingCircle);
@@ -47,21 +34,39 @@ public class VisualManager
         
         #endregion
     }
-    
+
+    private void TargetingCircleInit()
+    {
+        _circleImage = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/UI/TargetingCircle/TargetingCircle"),
+            _imageCanvas.transform);
+        
+        _circleImage.SetActive(false);
+    }
+
+    private void LineRendererInit()
+    {
+        _lineRenderer = Managers.ManagersGO.AddComponent<LineRenderer>();
+        _lineRenderer.material = Resources.Load<Material>("Materials/LineRenderer");
+        _lineRenderer.startColor = Color.cyan;
+        _lineRenderer.endColor = Color.cyan;
+        _lineRenderer.startWidth = 0.05f;
+        _lineRenderer.endWidth = 0.05f;
+        _lineRenderer.positionCount = 0;
+
+        _lineRenderer.shadowCastingMode = ShadowCastingMode.Off;
+    }
+
     private void DrawCircleOnEnemy(Vector3 currentTargetPos)
     {
         if (Managers.Game.TargetingSystem.Target == null) return;
         _circleImage.gameObject.SetActive(true);
         Vector3 screenPos = Camera.main.WorldToScreenPoint(currentTargetPos);
 
-        // 타겟팅 원의 위치 업데이트
         _circleImage.transform.position = screenPos;
 
-        // 타겟팅 원 회전
         _rotationOffset += 1;
         _circleImage.gameObject.transform.rotation = Quaternion.Euler(0, 0, _rotationOffset);
         
-        // 타겟팅 카메라 거리에 따른 원 크기 조절
         float dist = (Managers.Game.TargetingSystem.Target.transform.position - Camera.main.transform.position).magnitude;
         float scaleFactor = _circleSize / dist;
         _circleImage.transform.localScale = new Vector3(scaleFactor, scaleFactor, 1.0f);
@@ -69,13 +74,6 @@ public class VisualManager
     
     private void DrawLineToEnemy()
     {
-        // 적이 있는 경우 마우스와 적 사이에 선을 그림
-        // Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        // RaycastHit hit;
-        //
-        // if (Physics.Raycast(ray, out hit, 1000f, 1 << LayerMask.NameToLayer("Ground")))
-        //     mousePos = hit.point;
-
         Vector3 mousePos = Managers.Ray.RayHitPoint;
         Vector3 targetPosition = Managers.Game.TargetingSystem.Target.transform.position;
 
@@ -92,12 +90,5 @@ public class VisualManager
     private void ClearTargetingLineRenderer()
     {
         _lineRenderer.positionCount = 0;
-    }
-    
-    public void CreateMouseClickParticle(Vector3 pos)
-    {
-        // if (_mouseClickParticle) Destroy(_mouseClickParticle);
-        //
-        // _mouseClickParticle = Instantiate(mouseClickParticlePrefab, pos, mouseClickParticlePrefab.transform.rotation);
     }
 }

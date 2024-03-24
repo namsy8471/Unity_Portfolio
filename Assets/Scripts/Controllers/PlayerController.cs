@@ -65,8 +65,9 @@ public class PlayerController : MonoBehaviour
         {
             case PlayerState.Idle:
                 
-                if (Managers.Game.TargetingSystem.IsCurrentTargetExist() &&
-                    Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position) < _attackState.GetAtkRange())
+                if (Managers.Game.TargetingSystem.IsCurrentTargetExist()
+                    && Managers.Game.TargetingSystem.GetCurrentTarget().layer == LayerMask.NameToLayer("Enemy")
+                    && Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position) < _attackState.GetAtkRange())
                 {
                     ChangeState(PlayerState.Attack);
                     break;
@@ -123,8 +124,9 @@ public class PlayerController : MonoBehaviour
                     break;
                 }
 
-                if (Managers.Game.TargetingSystem.IsCurrentTargetExist() &&
-                    Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position) < _attackState.GetAtkRange())
+                if (Managers.Game.TargetingSystem.IsCurrentTargetExist()
+                    && Managers.Game.TargetingSystem.GetCurrentTarget().layer == LayerMask.NameToLayer("Enemy")
+                    && Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position) < _attackState.GetAtkRange())
                 {
                     ChangeState(PlayerState.Attack);
                     break;

@@ -43,8 +43,8 @@ public class Managers : MonoBehaviour
             
             Input.Init();
             Sound.Init();
-            Graphics.Init();
             Ray.Init();
+            Graphics.Init();
             
             Game.Init();
         }
@@ -54,6 +54,7 @@ public class Managers : MonoBehaviour
     {
         Input.Update();
         Ray.Update();
+        Graphics.Update();
         
         Game.Update();
     }

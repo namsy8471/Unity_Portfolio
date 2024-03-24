@@ -196,7 +196,6 @@ public class MoveState : IStateBase
     private void Move()
     {
         var camTransform = Camera.main.transform;
-        // 카메라가 보는 방향으로 이동
         var movement = camTransform.forward * _moveVertical + camTransform.right * _moveHorizontal;
         movement.y = 0f;
 
@@ -210,23 +209,18 @@ public class MoveState : IStateBase
 
     private void GetMousePos()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
+        _destPos = Managers.Ray.RayHitPoint;
 
-        LayerMask layerMask = 1 << LayerMask.NameToLayer("Ground") |
-                                 1 << LayerMask.NameToLayer("Enemy") |
-                                 1 << LayerMask.NameToLayer("Item");
-        
-        if (Physics.Raycast(ray, out hit, 1000f, layerMask))
+        if (Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Enemy") 
+            || Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Item"))
         {
-            _destPos = hit.point;
-            
-            if ((hit.transform.gameObject.layer == 1 << LayerMask.NameToLayer("Enemy") && !hit.collider.isTrigger) ||
-                hit.transform.gameObject.layer == 1 << LayerMask.NameToLayer("Item"))
-                _targetingSystem.Target = hit.transform.gameObject;
-            
-            else _targetingSystem.Target = null;
+            _targetingSystem.Target = Managers.Ray.RayHitCollider.transform.gameObject;
         }
+
+        // else
+        // {
+        //     _targetingSystem.Target = null;
+        // }
     }
     
     private void MoveByMouse()

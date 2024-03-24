@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5112849519192353448}
   - component: {fileID: 1934588908717479292}
   - component: {fileID: 3997237953947553552}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: ItemName
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -110,7 +110,7 @@ GameObject:
   - component: {fileID: 7687733987663073922}
   - component: {fileID: 6684469514871066993}
   - component: {fileID: 2508372925675967646}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: ShortSword
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -191,7 +191,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7687733987665005634}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.24117684, y: 0.11618661, z: 0.89930135}

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4423662366677069957}
   - component: {fileID: 4929950097620994907}
   - component: {fileID: 4423662366677069959}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Backpack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -107,7 +107,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4423662366679264837}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.5671133, y: 0.7708612, z: 0.8474971}
@@ -123,7 +123,7 @@ GameObject:
   - component: {fileID: 4423662367792711680}
   - component: {fileID: 4423662367792711682}
   - component: {fileID: 4423662367792711683}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: ItemName
   m_TagString: Untagged
   m_Icon: {fileID: 0}

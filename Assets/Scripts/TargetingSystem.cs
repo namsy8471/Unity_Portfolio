@@ -5,9 +5,6 @@ using UnityEngine.UI;
 
 public class TargetingSystem
 {
-    private Action _changeCursorForBattle;
-    private Action _changeCursorForNormal;
-    
     private Action _setClosestEnemyCollider;
     private Action<Vector3> _drawCircleOnEnemy;
     private Action _drawLineToEnemy;
@@ -16,12 +13,10 @@ public class TargetingSystem
     private Action _clearTargetingLineRenderer;
     
     public GameObject Target { get; set; }
-    
+    public bool isTargetingWorkNow { get; private set; }
+
     public void Init()
     {
-        _changeCursorForBattle += Managers.Graphics.Cursor.ChangeCursorForBattle;
-        _changeCursorForNormal += Managers.Graphics.Cursor.BackNormalCursor;
-        
         Managers.Input.AddAction(Managers.Input.KeyButtonDown, Managers.Input.TargetingKey, FindEnemy);
         Managers.Input.AddAction(Managers.Input.KeyButtonPressed, Managers.Input.TargetingKey, TargetEnemy);
         Managers.Input.AddAction(Managers.Input.KeyButtonUp, Managers.Input.TargetingKey, ClearTarget);
@@ -35,24 +30,22 @@ public class TargetingSystem
     private void FindEnemy()
     {
         _setClosestEnemyCollider?.Invoke();
+        isTargetingWorkNow = true;
     }
 
     private void TargetEnemy()
     {
         _drawCircleOnEnemy?.Invoke(Target.transform.position);
         _drawLineToEnemy?.Invoke();
-        
-        _changeCursorForBattle?.Invoke();
     }
     
     private void ClearTarget()
     {
         Target = null;
-        
+
+        isTargetingWorkNow = false;
         _clearTargetingLineRenderer?.Invoke();
         _clearTargetingCircle?.Invoke();
-        
-        _changeCursorForNormal?.Invoke();
     }
     
     public bool IsCurrentTargetExist()

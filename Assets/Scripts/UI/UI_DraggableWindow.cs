@@ -4,18 +4,12 @@ using UnityEngine.EventSystems;
 
 public class UI_DraggableWindow : UI_PopUp
 {
-    protected Action changeMouseCursorToGrabbing;
-    protected Action changeMouseCursorToNormal;
-    
     protected Vector2 firstClickedPos;
     protected Vector2 distanceWithWindow;
     
     protected override void Init()
     {
         base.Init();
-        
-        changeMouseCursorToGrabbing += Managers.Graphics.Cursor.ChangeCursorForGrabbing;
-        changeMouseCursorToNormal += Managers.Graphics.Cursor.BackNormalCursor;
     }
 
     public override void OnDrag(PointerEventData eventData)
@@ -26,13 +20,13 @@ public class UI_DraggableWindow : UI_PopUp
         var newPos = new Vector2(eventData.position.x - distanceWithWindow.x, eventData.position.y - distanceWithWindow.y);
         
         rectTransform.position = newPos;
-        changeMouseCursorToGrabbing?.Invoke();
+        Managers.Graphics.Cursor.SetIsDraggingNow(true);
     }
 
     public override void OnEndDrag(PointerEventData eventData)
     {
         base.OnEndDrag(eventData);
-        changeMouseCursorToNormal?.Invoke();
+        Managers.Graphics.Cursor.SetIsDraggingNow(false);
     }
 
     public override void OnPointerDown(PointerEventData eventData)

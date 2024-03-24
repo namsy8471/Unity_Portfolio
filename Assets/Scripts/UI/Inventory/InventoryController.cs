@@ -40,20 +40,12 @@ public class InventoryController
     private InventoryItem _itemToHighlight;
     private Vector2Int _oldPosition;
     
-    private Action _changeCursorForGrab;
-    private Action _changeCursorForGrabbing;
-    private Action _changeCursorForNormal;
-    
     public void Init()
     {
         _itemData.Add("Backpack", Resources.Load<ItemData>("ItemData/Backpack"));
         _itemData.Add("HpPotion", Resources.Load<ItemData>("ItemData/HpPotion"));
         _itemData.Add("LongSword", Resources.Load<ItemData>("ItemData/LongSword"));
         _itemData.Add("ShortSword", Resources.Load<ItemData>("ItemData/ShortSword"));
-        
-        _changeCursorForGrab += Managers.Graphics.Cursor.ChangeCursorForGrab;
-        _changeCursorForGrabbing += Managers.Graphics.Cursor.ChangeCursorForGrabbing;
-        _changeCursorForNormal += Managers.Graphics.Cursor.BackNormalCursor;
 
         #region KeyBinding
 
@@ -71,9 +63,7 @@ public class InventoryController
 
     public void Update()
     {
-        LootingItemFromGround();
         ItemDrag();
-        
         HandleHighlight();
     }
     
@@ -91,7 +81,7 @@ public class InventoryController
             }
             else
             {
-                // LootingItemFromGround();
+                LootingItemFromGround();
             }
         }
         else
@@ -111,29 +101,19 @@ public class InventoryController
     {
         if (_selectedItem != null || EventSystem.current.IsPointerOverGameObject()) return;
         
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        
-        
-        if (Physics.Raycast(ray, out RaycastHit hit, 100.0f, 1 << LayerMask.NameToLayer("Item")))
+        if (Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Item"))
         {
             if (Input.GetMouseButton(0))
             {
-                _changeCursorForGrabbing?.Invoke();
-                _itemToLoot = hit.transform.gameObject;
-                Managers.Game.Player.GetComponent<PlayerController>().MoveState.DestPos = _itemToLoot.transform.position;
+                _itemToLoot = Managers.Ray.RayHitCollider.transform.gameObject;
+                //Managers.Game.Player.GetComponent<PlayerController>().MoveState.DestPos = _itemToLoot.transform.position;
             }
-            else
-                _changeCursorForGrab?.Invoke();
             
-            if (_itemToLoot == hit.transform.gameObject && Vector3.Distance(hit.point, Managers.Game.Player.transform.position) < 1.0f)
+            if (_itemToLoot == Managers.Ray.RayHitCollider.transform.gameObject && Vector3.Distance(Managers.Ray.RayHitPoint, Managers.Game.Player.transform.position) < 2.0f)
             {
-                LootingItem(hit.transform.name);
-                Object.Destroy(hit.transform.gameObject);
+                LootingItem(Managers.Ray.RayHitCollider.transform.name);
+                Object.Destroy(Managers.Ray.RayHitCollider.transform.gameObject);
             }
-        }
-        else
-        {
-            _changeCursorForNormal?.Invoke();
         }
     }
 
@@ -272,8 +252,6 @@ public class InventoryController
         pickedUpItem.ItemData.Init();
         
         _selectedItem = pickedUpItem;
-        
-        _changeCursorForNormal?.Invoke();
     }
 
     // 아이템 드랍
@@ -282,21 +260,7 @@ public class InventoryController
         if (_selectedItem == null) return;
         if (EventSystem.current.IsPointerOverGameObject()) return;
         
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        
-        var pos = Vector3.zero;
-        if (Physics.Raycast(ray, out hit, 100f, 1 << LayerMask.NameToLayer("Ground")))
-        {
-            pos = hit.point;
-            Debug.Log("ㅁㅁ" + hit.transform.gameObject.layer);
-            
-        }
-        else
-        {
-            Debug.Log("다른 레이어에 명중 : layernumber = " + hit.transform.gameObject.layer);
-        }
-
+        var pos = Managers.Ray.RayHitPoint;
         if (Vector3.Distance(pos, Managers.Game.Player.transform.position) > 1f) return;
             
         pos.y = _selectedItem.ItemData.GroundYOffset;
@@ -306,6 +270,7 @@ public class InventoryController
         
         var droppedItem = GameObject.Instantiate(_dropItemModeling, pos, _dropItemModeling.transform.rotation);
         droppedItem.GetComponent<ItemNameTag>().ItemData = _selectedItem.ItemData;
+        droppedItem.name = droppedItem.GetComponent<ItemNameTag>().ItemData.ItemName;
         
         // 아이템 프리펩 생성
         _selectedItem.ItemData.DropItem();

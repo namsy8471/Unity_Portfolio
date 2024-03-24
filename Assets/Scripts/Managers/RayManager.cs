@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 public class RayManager
 {
-    // This Manager manage Ray. All function needed to use ray need to access this Manager.
+    // This Manager manages Ray. All functions needed to use ray needs to access this Manager.
     // 이 매니저는 레이를 관리합니다. 레이가 필요한 모든 기능은 이 매니저에 접근해야만 합니다.
 
     private Collider _hitCollider;
@@ -29,32 +29,40 @@ public class RayManager
     private void CastRay()
     {
         if (Util.IsMousePointerOutOfScreen()) return;
-        if (EventSystem.current.IsPointerOverGameObject()) return;
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         
         if (Physics.Raycast(ray, out hit, 100f))
         {
-            if (hit.collider.isTrigger)
-            {
-                if (Physics.Raycast(hit.point, ray.direction, out hit, 100f))
-                {
-                    _hitCollider = hit.collider;
-                    _hitPoint = hit.point;
-                    
-                    Debug.Log(_hitCollider.name);
-                }
-            }
-            
-            else
-            {
-                _hitCollider = hit.collider;
-                _hitPoint = hit.point;
-            }
+            CheckingIsTriggerOn(hit, ray);
         }
 
-        Debug.DrawRay(ray.origin, ray.direction * 100f, Color.green);
+        //Debug.DrawRay(ray.origin, ray.direction * 100f, Color.green);
+    }
+
+    private void CheckingIsTriggerOn(RaycastHit hit, Ray ray)
+    {
+        if (hit.collider.isTrigger)
+        {
+            Debug.DrawRay(hit.point, ray.direction * 100f, Color.blue);
+            if (Physics.Raycast(hit.point, ray.direction, out hit, 100f))
+            {
+                CheckingIsTriggerOn(hit, ray);
+            }
+        }
+            
+        else
+        {
+            SaveHitInfo(hit);
+            Debug.Log("Collider which is not isTrigger on = " + hit.collider.name);
+        }
+    }
+
+    void SaveHitInfo(RaycastHit hit)
+    {
+        _hitCollider = hit.collider;
+        _hitPoint = hit.point;
     }
 
     private void SetClosestEnemyCollider()
