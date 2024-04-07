@@ -23,11 +23,11 @@ public class ItemDataBackpack : ItemData
         //가방 만들기
         //if (_inventory == null)
         {
-            _inventory = Instantiate(_inventoryPrefab, Managers.Game.MainInventory.gameObject.transform.position + Vector3.up * 200, Quaternion.identity,
-                Managers.Game.InventoryUICanvas.transform);
+            _inventory = Instantiate(_inventoryPrefab, Managers.Graphics.UI.MainInventory.gameObject.transform.position + Vector3.up * 200, Quaternion.identity,
+                Managers.Graphics.UI.InventoryUICanvas.transform);
             _inventory.transform.SetAsFirstSibling();
             _inventory.GetComponentInChildren<Inventory_Sub>().Init(_inventoryWidth, _inventoryHeight);
-            Managers.Game.InventoryList.Add(_inventory.GetComponentInChildren<Inventory_Sub>());
+            Managers.Graphics.UI.InventoryList.Add(_inventory.GetComponentInChildren<Inventory_Sub>());
             _inventory.gameObject.SetActive(_isOpen);
         }
         
@@ -45,7 +45,7 @@ public class ItemDataBackpack : ItemData
     public override void DropItem()
     {
         Debug.Log("가방 버려짐!");
-        Managers.Game.InventoryList.Remove(_inventory.GetComponentInChildren<Inventory_Sub>());
+        Managers.Graphics.UI.InventoryList.Remove(_inventory.GetComponentInChildren<Inventory_Sub>());
         Destroy(_inventory.gameObject);
     }
 

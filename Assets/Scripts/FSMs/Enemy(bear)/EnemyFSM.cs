@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class EnemyFSM : MonoBehaviour
@@ -20,8 +21,8 @@ public class EnemyFSM : MonoBehaviour
         Battle
     }
 
-    [SerializeField] private EnemyState enemyState;
-    [SerializeField] private BattleState battleState;
+    [SerializeField] private EnemyState _enemyState;
+    [SerializeField] private BattleState _battleState;
     
     private EnemyIdleState _idleState;
     private EnemyMoveState _moveState;
@@ -32,7 +33,6 @@ public class EnemyFSM : MonoBehaviour
     private SphereCollider _detectCol;
     
     private GameObject _player;
-    private Transform _tr;
 
     private float _petrolTimer;
     private bool _playerInRange;
@@ -42,14 +42,14 @@ public class EnemyFSM : MonoBehaviour
         _animator = GetComponentInChildren<Animator>();
 
         _detectCol = GetComponentInChildren<SphereCollider>();
-        GetComponentInChildren<EnemyDetectingBoundary>().TriggerEnter += OnTriggerEnterInDetectingCollider;
-        GetComponentInChildren<EnemyDetectingBoundary>().TriggerExit += OnTriggerExitFromDetectingCollider;
+        GetComponentInChildren<EnemyDetectingBoundary>().TriggerEnter = OnTriggerEnterInDetectingCollider;
+        GetComponentInChildren<EnemyDetectingBoundary>().TriggerExit = OnTriggerExitFromDetectingCollider;
         
         _player = Managers.Game.Player;
-        _tr = GetComponent<Transform>();
         
-        enemyState = EnemyState.Idle;
-        battleState = BattleState.Idle;
+        _enemyState = EnemyState.Idle;
+        _battleState = BattleState.Idle;
+        
         _animator.SetBool("Idle",true);
 
         _petrolTimer = 0;
@@ -68,7 +68,7 @@ public class EnemyFSM : MonoBehaviour
 
     void Update()
     {
-        switch (enemyState)
+        switch (_enemyState)
         {
             case EnemyState.Idle:
                 if (_petrolTimer > 3)
@@ -112,9 +112,9 @@ public class EnemyFSM : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _playerInRange = Vector3.Distance(_player.transform.position, _tr.position) <= _attackState.GetAttackRange();
+        _playerInRange = Vector3.Distance(_player.transform.position, transform.position) <= _attackState.GetAttackRange();
         
-        switch (enemyState)
+        switch (_enemyState)
         {
             case EnemyState.Move:
                 if (_moveState.GetPatrolDone())
@@ -136,7 +136,7 @@ public class EnemyFSM : MonoBehaviour
 
     void ChangeState(EnemyState state)
     {
-        switch (enemyState)
+        switch (_enemyState)
         {
             case EnemyState.Idle:
                 _idleState.EndState();
@@ -154,9 +154,9 @@ public class EnemyFSM : MonoBehaviour
                 break;
         }
 
-        enemyState = state;
+        _enemyState = state;
 
-        switch (enemyState)
+        switch (_enemyState)
         {
             case EnemyState.Idle:
                 _idleState.StartState();
@@ -177,7 +177,7 @@ public class EnemyFSM : MonoBehaviour
 
     void ChangeState(BattleState state)
     {
-        switch (battleState)
+        switch (_battleState)
         {
             case BattleState.Idle:
                 _animator.SetBool("Idle", false);
@@ -188,9 +188,9 @@ public class EnemyFSM : MonoBehaviour
                 break;
         }
 
-        battleState = state;
+        _battleState = state;
 
-        switch (battleState)
+        switch (_battleState)
         {
             case BattleState.Idle:
                 _animator.SetBool("Idle", true);
@@ -209,7 +209,7 @@ public class EnemyFSM : MonoBehaviour
         ChangeState(EnemyState.Move);
     }
     
-    private void GetDamage(float value)
+    public void GetDamage(float value)
     {
         ChangeState(EnemyState.GetDamage);
         gameObject.SendMessage("AddDownGauge", value, SendMessageOptions.DontRequireReceiver);
@@ -222,13 +222,13 @@ public class EnemyFSM : MonoBehaviour
     
     private void OnTriggerEnterInDetectingCollider(Collider other)
     {
-        if (other.CompareTag("Player") && battleState == BattleState.Idle)
+        if (other.CompareTag("Player") && _battleState == BattleState.Idle)
         {
             var playerPos = _player.transform.position;
-            var position = _tr.position;
+            var position = transform.position;
             playerPos.y = position.y;
             
-            _tr.LookAt(playerPos);
+            transform.LookAt(playerPos);
             
             _moveState.SetFindPlayer(true);
             
@@ -242,7 +242,7 @@ public class EnemyFSM : MonoBehaviour
 
     private void OnTriggerExitFromDetectingCollider(Collider other)
     {
-        if (other.CompareTag("Player") && battleState == BattleState.Battle)
+        if (other.CompareTag("Player") && _battleState == BattleState.Battle)
         {
             _moveState.SetFindPlayer(false);
             ChangeState(BattleState.Idle);

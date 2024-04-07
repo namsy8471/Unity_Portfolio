@@ -2,159 +2,190 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class AttackState : IStateBase
 {
-    private enum AtkState
-    {
-        Idle,
-        Atk1,
-        Atk2,
-        Atk3,
-        AtkFinish
-    }
-
-    private AtkState _atkState;
     
-    private float attackRange;
-    private float attackCooldown;
-    private float lastAttackCooldown;
-    private float attackTimer;
-
-    private float downGauge;
+     /*
+     * 내가 필요한 거
+     * 사거리? => 플레이어 스탯에서 들고오면 됨
+     * 어택 쿨다운? => 플레이어 스탯에서 공속을 만들자!
+     * 대미지 => 플레이어 스탯에서!
+     * 최대 공격횟수 => 플레이어스탯
+     */
+     
+    private float _lastAttackCooldown;
+    private float _attackTimer;
     
-    private Animator animator;
+    private Animator _animator;
 
     public void Init()
     {
-        _atkState = AtkState.Idle;
-        animator = Managers.Game.Player.GetComponentInChildren<Animator>();
+        _animator = Managers.Game.Player.GetComponentInChildren<Animator>();
         
-        downGauge = 34;
-        
-        attackRange = 3.0f;
-        attackCooldown = 0.3f;
-        lastAttackCooldown = 2.0f;
-        attackTimer = 0;
+        _lastAttackCooldown = 2.0f;
+        _attackTimer = 0;
     }
 
     public void StartState()
     {
-        // Debug.Log("Attack State Start!");
+        _attackTimer = 0;
 
-        attackTimer = 0;
-
+        Debug.Log("Attack State Start");
+        
+        if (Managers.Game.Player.GetComponent<Stat>().Stamina < 3f) return;
+        Managers.Game.Player.GetComponent<Stat>().Stamina -= 3f;
+        
+        switch (Managers.Game.Player.GetComponent<PlayerStat>().AtkStyle)
+        {
+            case ItemDataWeapon.AttackStyle.Punch:
+                _animator.Play("HandAtk" + Random.Range(1, 4));
+                break;
+            case ItemDataWeapon.AttackStyle.Sword:
+                _animator.Play("Atk" + Random.Range(1, 4));
+                break;
+            case ItemDataWeapon.AttackStyle.Bow:
+                break;
+            case ItemDataWeapon.AttackStyle.Wand:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     public void UpdateState()
     {
-        // Debug.Log("Attack State Update!");
-        // Debug.Log("Attack State : " + atkState);
-        attackTimer += Time.deltaTime;
-        
-        if(attackTimer >= 2)
-            ChangeState(AtkState.AtkFinish);
-        
-        switch (_atkState)
-        {
-            case AtkState.Idle:
-                
-                if (Input.GetMouseButtonDown(0) && !Managers.Game.TargetingSystem.GetCurrentTarget().GetComponent<EnemyGetDamageState>().IsInvincible())
-                {
-                    ChangeState(AtkState.Atk1);
-                    break;
-                }
-                
-                break;
-            
-            case AtkState.Atk1:
-                if (Input.GetMouseButtonDown(0) && attackTimer >= attackCooldown)
-                {
-                    ChangeState(AtkState.Atk2);
-                    break;
-                }
-                
-                break;
-            
-            case AtkState.Atk2:
-                if (Input.GetMouseButtonDown(0) && attackTimer >= attackCooldown)
-                {
-                    ChangeState(AtkState.Atk3);
-                    break;
-                }
-                break;
-            
-            case AtkState.Atk3:
-                if (attackTimer >= lastAttackCooldown)
-                {
-                    ChangeState(AtkState.AtkFinish);
-                    break;
-                }
-                break;
-            case AtkState.AtkFinish:
-                
-                break;
-        }
+        Debug.Log("Attack State Update");
+
+        // _attackTimer += Time.deltaTime;
+        //
+        // if(_attackTimer >= 2)
+        //     ChangeState(AtkState.AtkFinish);
+        //
+        // switch (_atkState)
+        // {
+        //     case AtkState.Idle:
+        //         
+        //         if (Input.GetMouseButtonDown(0) && !Managers.Game.TargetingSystem.GetCurrentTarget().GetComponent<EnemyGetDamageState>().IsInvincible())
+        //         {
+        //             ChangeState(AtkState.Atk1);
+        //             break;
+        //         }
+        //         
+        //         break;
+        //     
+        //     case AtkState.Atk1:
+        //         if (Input.GetMouseButtonDown(0) && _attackTimer >= Managers.Game.Player.GetComponent<Stat>().AtkSpeed)
+        //         {
+        //             ChangeState(AtkState.Atk2);
+        //             break;
+        //         }
+        //         
+        //         break;
+        //     
+        //     case AtkState.Atk2:
+        //         if (Input.GetMouseButtonDown(0) && _attackTimer >= Managers.Game.Player.GetComponent<Stat>().AtkSpeed)
+        //         {
+        //             ChangeState(AtkState.Atk3);
+        //             break;
+        //         }
+        //         break;
+        //     
+        //     case AtkState.Atk3:
+        //         if (_attackTimer >= _lastAttackCooldown)
+        //         {
+        //             ChangeState(AtkState.AtkFinish);
+        //             break;
+        //         }
+        //         break;
+        //     case AtkState.AtkFinish:
+        //         
+        //         break;
+        // }
     }
 
     public void EndState()
     {
-        // Debug.Log("Attack State End!");
-        _atkState = AtkState.Idle;
+        Debug.Log("Attack State End!");
+        // _atkState = AtkState.Idle;
     }
     
-    private void Attack()
+    public void Attack()
     {
-        Managers.Game.TargetingSystem.GetCurrentTarget().SendMessage("GetDamage", downGauge, SendMessageOptions.DontRequireReceiver);
+        var targetPos = Managers.Game.TargetingSystem.GetCurrentTarget().transform.position;
+        targetPos.y = Managers.Game.Player.transform.position.y;
+        
+        Managers.Game.Player.transform.LookAt(targetPos);
+        
+        Managers.Game.TargetingSystem.GetCurrentTarget().GetComponent<EnemyFSM>().
+            GetDamage(Managers.Game.Player.GetComponent<Stat>().DownGaugeToHit);
+        
+        Managers.Input.StopInputUpdate();
+        IEnumerator coroutine = RestartInputUpdate();
+
+        Debug.Log("코루틴 작동 전");
+
+        while (coroutine.MoveNext())
+        {
+            Debug.Log("코루틴 작동");
+        }
     }
 
-    private void ChangeState(AtkState state)
+    IEnumerator RestartInputUpdate()
     {
-        switch (_atkState)
-        {
-            case AtkState.Idle:
-                break;
-            case AtkState.Atk1:
-                break;
-            case AtkState.Atk2:
-                break;
-            case AtkState.Atk3:
-                break;
-            default:
-                break;
-        }
-
-        _atkState = state;
-        attackTimer = 0;
-        
-        switch (_atkState)
-        {
-            case AtkState.Idle:
-                break;
-            case AtkState.Atk1:
-                animator.SetTrigger("Attack");
-                Attack();
-                break;
-            case AtkState.Atk2:
-                animator.SetTrigger("NextAttack");
-                Attack();
-                break;
-            case AtkState.Atk3:
-                animator.SetTrigger("LastAttack");
-                Attack();
-                break;
-            case AtkState.AtkFinish:
-                Managers.Game.Player.gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
-                break;
-            default:
-                break;
-        }
-        
+        yield return new WaitForSeconds(Managers.Game.Player.GetComponent<PlayerStat>().AtkSpeed);
+        AttackEnd();
+        Debug.Log("코루틴 종료");
+    }
+    
+    private void AttackEnd()
+    {
+        Managers.Input.StartInputUpdate();
     }
 
-    public float GetAtkRange()
+    private void ChangeState()
     {
-        return attackRange;
+        // switch (_atkState)
+        // {
+        //     case AtkState.Idle:
+        //         break;
+        //     case AtkState.Atk1:
+        //         break;
+        //     case AtkState.Atk2:
+        //         break;
+        //     case AtkState.Atk3:
+        //         break;
+        //     default:
+        //         break;
+        // }
+        //
+        // _atkState = state;
+        // _attackTimer = 0;
+        //
+        // switch (_atkState)
+        // {
+        //     case AtkState.Idle:
+        //         break;
+        //     case AtkState.Atk1:
+        //         _animator.SetTrigger("Attack");
+        //         Attack();
+        //         break;
+        //     case AtkState.Atk2:
+        //         _animator.SetTrigger("NextAttack");
+        //         Attack();
+        //         break;
+        //     case AtkState.Atk3:
+        //         _animator.SetTrigger("LastAttack");
+        //         Attack();
+        //         break;
+        //     case AtkState.AtkFinish:
+        //         Managers.Game.Player.gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
+        //         break;
+        //     default:
+        //         break;
+        // }
+        
     }
     
 }

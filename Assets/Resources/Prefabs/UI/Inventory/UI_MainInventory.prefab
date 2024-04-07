@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6542281983358386429}
   - component: {fileID: 6542281983358386431}
   - component: {fileID: 6542281983358386430}
+  - component: {fileID: 7621341994047271970}
   m_Layer: 5
   m_Name: Shoes
   m_TagString: Untagged
@@ -76,6 +77,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7621341994047271970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6542281983358386428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18280fadb5bbdf14fb3133c7d3bc3c0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6542281983416629713
 GameObject:
   m_ObjectHideFlags: 0
@@ -167,6 +180,7 @@ GameObject:
   - component: {fileID: 6542281983451760635}
   - component: {fileID: 6542281983451760637}
   - component: {fileID: 6542281983451760636}
+  - component: {fileID: 3284484880383183111}
   m_Layer: 5
   m_Name: LeftHand
   m_TagString: Untagged
@@ -232,6 +246,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3284484880383183111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6542281983451760634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86ef64483fc89174f9487e0cb7dc660c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6542281983657979547
 GameObject:
   m_ObjectHideFlags: 0
@@ -390,6 +416,7 @@ GameObject:
   - component: {fileID: 6542281983788477171}
   - component: {fileID: 6542281983788477173}
   - component: {fileID: 6542281983788477172}
+  - component: {fileID: 4826012776617572083}
   m_Layer: 5
   m_Name: Body
   m_TagString: Untagged
@@ -455,6 +482,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4826012776617572083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6542281983788477170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b57943b5b9aee13498d1f87ce0ae0d30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6542281983905424605
 GameObject:
   m_ObjectHideFlags: 0
@@ -620,6 +659,7 @@ GameObject:
   - component: {fileID: 6542281984162769187}
   - component: {fileID: 6542281984162769189}
   - component: {fileID: 6542281984162769188}
+  - component: {fileID: 7334876584062747689}
   m_Layer: 5
   m_Name: Head
   m_TagString: Untagged
@@ -685,6 +725,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7334876584062747689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6542281984162769186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a56da2724164c540bca112d76653958, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6542281984336712242
 GameObject:
   m_ObjectHideFlags: 0
@@ -958,8 +1010,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 076a5fbf0aaee8d469c8ad7de8e1fe00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equipmentSlotType: 0
-  defaultEquipmentGameObject: {fileID: 0}
 --- !u!1 &8833462510408661675
 GameObject:
   m_ObjectHideFlags: 0

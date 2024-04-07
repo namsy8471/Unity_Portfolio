@@ -21,14 +21,18 @@ public class PlayerController : MonoBehaviour
     private readonly AttackState _attackState = new AttackState();
     private readonly GetDamageState _getDamageState = new GetDamageState();
 
-    public MoveState MoveState => _moveState;
-
-    private bool isBattle;
-
-    private Animator _animator;
-    
     private List<Action> _playerMouseDownActions = new List<Action>();
     private List<Action> _playerMousePressedActions = new List<Action>();
+    
+    private bool isBattle;
+    private Animator _animator;
+
+    private float _healRegenTimer;
+    private float _healRegenTimeLimit;
+    
+    public MoveState MoveState => _moveState;
+    public AttackState AttackState => _attackState;
+    
     public List<Action> PlayerMouseDownActions => _playerMouseDownActions;
     public List<Action> PlayerMousePressedActions => _playerMousePressedActions;
     
@@ -39,7 +43,10 @@ public class PlayerController : MonoBehaviour
         isBattle = false;
         
         _animator = GetComponentInChildren<Animator>();
-
+        
+        _healRegenTimeLimit = 5;
+        _healRegenTimer = _healRegenTimeLimit;
+        
         #region KeyBinding in InputManager
         Managers.Input.KeyButtonDown.Add(Managers.Input.PostureChangeKey, PostureChangeFunction);
         
@@ -64,10 +71,31 @@ public class PlayerController : MonoBehaviour
         switch (currentState)
         {
             case PlayerState.Idle:
+            case PlayerState.Move:
+                if (_healRegenTimer <= 0)
+                {
+                    Managers.Game.Player.GetComponent<Stat>().Hp += 0.01f;
+                    Managers.Game.Player.GetComponent<Stat>().Mp += 0.01f;
+                    Managers.Game.Player.GetComponent<Stat>().Stamina += 0.01f;
+                }
+                else _healRegenTimer -= Time.deltaTime;
+                break;
+            
+            case PlayerState.Attack:
+            case PlayerState.GetDamage:
+                _healRegenTimer = _healRegenTimeLimit;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
+        switch (currentState)
+        {
+            case PlayerState.Idle:
                 
                 if (Managers.Game.TargetingSystem.IsCurrentTargetExist()
                     && Managers.Game.TargetingSystem.GetCurrentTarget().layer == LayerMask.NameToLayer("Enemy")
-                    && Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position) < _attackState.GetAtkRange())
+                    && Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position) < Managers.Game.Player.GetComponent<Stat>().AtkRange)
                 {
                     ChangeState(PlayerState.Attack);
                     break;
@@ -81,7 +109,8 @@ public class PlayerController : MonoBehaviour
 
                 if (!Managers.Game.TargetingSystem.IsCurrentTargetExist())
                 {
-                    ChangeState(PlayerState.Idle);    
+                    ChangeState(PlayerState.Idle);
+                    break;
                 }
                 
                 _attackState.UpdateState();
@@ -99,19 +128,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void PostureChangeFunction()
-    {
-        if (Managers.Game.TargetingSystem.IsCurrentTargetExist())
-        {
-            isBattle = true;
-            _animator.SetBool("isBattle", isBattle);
-            return;
-        }
-        
-        isBattle = !isBattle;
-        _animator.SetBool("isBattle", isBattle);
-    }
-
     private void FixedUpdate()
     {
         switch (currentState)
@@ -126,7 +142,8 @@ public class PlayerController : MonoBehaviour
 
                 if (Managers.Game.TargetingSystem.IsCurrentTargetExist()
                     && Managers.Game.TargetingSystem.GetCurrentTarget().layer == LayerMask.NameToLayer("Enemy")
-                    && Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position) < _attackState.GetAtkRange())
+                    && Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position,
+                        transform.position) <  Managers.Game.Player.GetComponent<Stat>().AtkRange)
                 {
                     ChangeState(PlayerState.Attack);
                     break;
@@ -140,7 +157,19 @@ public class PlayerController : MonoBehaviour
                 break;
         }
     }
-
+    
+    private void PostureChangeFunction()
+    {
+        if (Managers.Game.TargetingSystem.IsCurrentTargetExist())
+        {
+            isBattle = true;
+            _animator.SetBool("isBattle", isBattle);
+            return;
+        }
+        
+        isBattle = !isBattle;
+        _animator.SetBool("isBattle", isBattle);
+    }
     
     private void ChangeState(PlayerState newState)
     {
@@ -195,7 +224,6 @@ public class PlayerController : MonoBehaviour
     
     private void GetDamage(float value)
     {
-        // Debug.Log("GetDamage 매소드 작동");
         ChangeState(PlayerState.GetDamage);
         gameObject.SendMessage("AddDownGauge", value, SendMessageOptions.DontRequireReceiver);
     }
@@ -209,4 +237,5 @@ public class PlayerController : MonoBehaviour
     {
         ChangeState(PlayerState.Move);
     }
+
 }

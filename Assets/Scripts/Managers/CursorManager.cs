@@ -26,6 +26,8 @@ public class CursorManager
 
     public void Update()
     {
+        if(Util.IsMousePointerOutOfScreen()) return;
+        
         if (Managers.Game.TargetingSystem.isTargetingWorkNow
             || Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Enemy"))
         {

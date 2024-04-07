@@ -46,6 +46,8 @@ public class InventoryController
         _itemData.Add("HpPotion", Resources.Load<ItemData>("ItemData/HpPotion"));
         _itemData.Add("LongSword", Resources.Load<ItemData>("ItemData/LongSword"));
         _itemData.Add("ShortSword", Resources.Load<ItemData>("ItemData/ShortSword"));
+        _itemData.Add("HighLevelShield", Resources.Load<ItemData>("ItemData/HighLevelShield"));
+        _itemData.Add("LowLevelShield", Resources.Load<ItemData>("ItemData/LowLevelShield"));
 
         #region KeyBinding
 
@@ -58,7 +60,7 @@ public class InventoryController
         
         _inventoryHighlight.Init();
         
-        _canvasTransform = Managers.Game.InventoryUICanvas.gameObject.transform;
+        _canvasTransform = Managers.Graphics.UI.InventoryUICanvas.gameObject.transform;
     }
 
     public void Update()
@@ -70,8 +72,6 @@ public class InventoryController
     private void LeftMouseButtonPress()
     {
         var tileGridPosition = GetTileGridPosition();
-        
-        Debug.Log("포지션 = " + tileGridPosition);
         
         if (tileGridPosition == new Vector2Int(-1, -1))
         {
@@ -264,6 +264,7 @@ public class InventoryController
         if (Vector3.Distance(pos, Managers.Game.Player.transform.position) > 1f) return;
             
         pos.y = _selectedItem.ItemData.GroundYOffset;
+        if (pos.y == 0) pos.y = 0.25f;
         
         // 아이템 정보 얻기
         _dropItemModeling = _selectedItem.ItemData.ItemModelingForDropping;

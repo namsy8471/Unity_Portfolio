@@ -11,7 +11,7 @@ public class InventoryHighlight
     public void Init()
     {
         _highlighter = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/UI/Inventory/UI_Highlighter")).GetComponent<RectTransform>();
-        _highlighter.transform.SetParent(Managers.Game.InventoryUICanvas.transform);
+        _highlighter.transform.SetParent(Managers.Graphics.UI.InventoryUICanvas.transform);
     }
     
     public void Show(bool value)

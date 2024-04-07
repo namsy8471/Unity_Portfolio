@@ -48,6 +48,8 @@ public class InputManager
 
     private List<KeyCode> _wholeKeyList = new List<KeyCode>();
     
+    public bool InputUpdateState { get; private set; }
+
     public void Init()
     {
         _inventoryKeyCode = KeyCode.I;
@@ -63,10 +65,14 @@ public class InputManager
         _walkKeyCode = KeyCode.LeftShift;
 
         _targetingKeyCode = KeyCode.LeftControl;
+
+        InputUpdateState = true;
     }
 
     public void Update()
     {
+        if (InputUpdateState == false) return;
+        
         foreach (var keyCode in _keyButtonDown.Keys)
         {
             if (Input.GetKeyDown(keyCode))
@@ -122,6 +128,8 @@ public class InputManager
         {
             dictionary.Add(key, action);
         }
+        
+        _wholeKeyList.Add(key);
     }
     
     public void RemoveAction(Dictionary<KeyCode, Action> dictionary, KeyCode key, Action action)
@@ -129,8 +137,9 @@ public class InputManager
         if (!dictionary.ContainsKey(key)) return;
         
         dictionary[key] -= action;
+        _wholeKeyList.Remove(key);
     }
-
+    
     public void RemovePlayerMouseActions()
     {
         foreach (var action in Managers.Game.Player.GetComponent<PlayerController>().PlayerMouseDownActions)
@@ -143,6 +152,7 @@ public class InputManager
             Managers.Input.LMBPressed -= action;
         }
     }
+    
     public void RollbackPlayerMouseActions()
     {
         foreach (var action in Managers.Game.Player.GetComponent<PlayerController>().PlayerMouseDownActions)
@@ -206,5 +216,15 @@ public class InputManager
             default:
                 break;
         }
+    }
+
+    public void StopInputUpdate()
+    {
+        InputUpdateState = false;
+    }
+    
+    public void StartInputUpdate()
+    {
+        InputUpdateState = true;
     }
 }

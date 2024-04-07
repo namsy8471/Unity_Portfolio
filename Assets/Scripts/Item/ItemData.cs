@@ -13,18 +13,18 @@ public class ItemData : ScriptableObject
     public int Width => width;
     public int Height => height;
 
-    [SerializeField] private string itemName;
-    [SerializeField] private Sprite itemIcon;
-    [SerializeField] private GameObject itemModelingForDropping;
-    [SerializeField] private GameObject itemModelingForEquipment;
-    [SerializeField] private float groundYOffset;
+    [SerializeField] private string _itemName;
+    [SerializeField] private Sprite _itemIcon;
+    [SerializeField] private GameObject _itemModelingForDropping;
+    [SerializeField] private GameObject _itemModelingForEquipment;
+    [SerializeField] private float _groundYOffset;
 
-    public Sprite ItemIcon => itemIcon;
-    public string ItemName => itemName;
-    public GameObject ItemModelingForDropping => itemModelingForDropping;
-    public GameObject ItemModelingForEquipment => itemModelingForEquipment;
-    public float GroundYOffset => groundYOffset;
-    public InventoryController InventoryController => Managers.Game.InventoryController;
+    public Sprite ItemIcon => _itemIcon;
+    public string ItemName => _itemName;
+    public GameObject ItemModelingForDropping => _itemModelingForDropping;
+    public GameObject ItemModelingForEquipment => _itemModelingForEquipment;
+    public float GroundYOffset => _groundYOffset;
+    protected InventoryController InventoryController => Managers.Game.InventoryController;
 
     // 이미지 크기
     public void GetImageSize(out int x, out int y)
@@ -36,7 +36,7 @@ public class ItemData : ScriptableObject
     // 그리드 사이즈 구하기
     public void SetGridSize()
     {
-        var size = itemIcon.rect.size;
+        var size = _itemIcon.rect.size;
         
         width = (int)(size.x / ItemGrid.TileSize.Width);
         height = (int)(size.y / ItemGrid.TileSize.Height);

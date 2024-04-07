@@ -209,18 +209,20 @@ public class MoveState : IStateBase
 
     private void GetMousePos()
     {
-        _destPos = Managers.Ray.RayHitPoint;
-
-        if (Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Enemy") 
-            || Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Item"))
+        if (Managers.Game.TargetingSystem.isTargetingWorkNow)
         {
-            _targetingSystem.Target = Managers.Ray.RayHitCollider.transform.gameObject;
+            _destPos = Managers.Game.TargetingSystem.Target.transform.position;
         }
+        else
+        {
+            _destPos = Managers.Ray.RayHitPoint;
 
-        // else
-        // {
-        //     _targetingSystem.Target = null;
-        // }
+            if (Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Enemy")
+                || Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Item"))
+            {
+                _targetingSystem.Target = Managers.Ray.RayHitCollider.transform.gameObject;
+            }
+        }
     }
     
     private void MoveByMouse()

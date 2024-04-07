@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 2
   height: 2
-  itemName: Backpack
-  itemIcon: {fileID: 21300000, guid: c69f2f61e47264d7cb77496e8172aa64, type: 3}
-  itemModelingForDropping: {fileID: 4423662366679264837, guid: 1d4ac1b215140d247870fdd5c072cb3a, type: 3}
-  itemModelingForEquipment: {fileID: 0}
-  groundYOffset: 0.292
+  _itemName: Backpack
+  _itemIcon: {fileID: 21300000, guid: c69f2f61e47264d7cb77496e8172aa64, type: 3}
+  _itemModelingForDropping: {fileID: 4423662366679264837, guid: 1d4ac1b215140d247870fdd5c072cb3a, type: 3}
+  _itemModelingForEquipment: {fileID: 0}
+  _groundYOffset: 0
   _inventoryPrefab: {fileID: 4477601261976165356, guid: b22489171cc00cb4fa9b13c4ecf4becb, type: 3}
   _inventory: {fileID: 0}
   _inventoryWidth: 6

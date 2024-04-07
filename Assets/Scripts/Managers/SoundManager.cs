@@ -14,12 +14,14 @@ public class SoundManager
         _soundFiles = new Dictionary<string, AudioClip>();
         _count = new Dictionary<string, int>();
         
-        AddWalkSound();
+        AddSound();
     }
 
-    private void AddWalkSound()
+    private void AddSound()
     {
         for (int i = 1; i <= 10; i++) AddSoundFile("Walk/Walk");
+        AddSoundFile("Sword/Sword");
+        AddSoundFile("Punch/Punch");
     }
 
     private AudioClip AddSoundFile(string path)

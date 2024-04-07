@@ -15,9 +15,22 @@ public class ItemNameTag : MonoBehaviour
     
     private void Start()
     {
-        _itemNameText = GetComponentInChildren<TextMesh>();
+        if (GetComponentInChildren<TextMesh>() != null)
+        {
+            _itemNameText = GetComponentInChildren<TextMesh>();
+        }
+
+        else
+        {
+            GameObject go = Instantiate(new GameObject(name: "ItemName"), gameObject.transform);
+            go.name = "ItemName";
+            _itemNameText = go.AddComponent<TextMesh>();
+        }
         
         _itemNameText.text = itemData.ItemName;
+        _itemNameText.characterSize = 0.2f;
+        _itemNameText.anchor = TextAnchor.LowerCenter;
+        _itemNameText.alignment = TextAlignment.Center;
     }
 
     private void Update()

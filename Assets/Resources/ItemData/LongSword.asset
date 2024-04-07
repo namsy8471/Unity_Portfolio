@@ -9,18 +9,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d043f520a6fde064fb80896f6fa0821f, type: 3}
+  m_Script: {fileID: 11500000, guid: a6ca888c73527974b9a5303eae0ab1d9, type: 3}
   m_Name: LongSword
   m_EditorClassIdentifier: 
   width: 1
   height: 3
-  itemName: LongSword
-  itemIcon: {fileID: 21300000, guid: e365f8649eb3e6f459a7c9afed5c603b, type: 3}
-  itemModelingForDropping: {fileID: 255703738863542009, guid: c64d4cade2c2e3c48ac1662cd09d0432, type: 3}
-  itemModelingForEquipment: {fileID: 8725849294108728461, guid: f0597553dac853d4f821364dbe74b08c, type: 3}
-  groundYOffset: 0
-  type: 2
-  minAtk: 14
-  maxAtk: 27
-  def: 0
-  durability: 15
+  _itemName: LongSword
+  _itemIcon: {fileID: 21300000, guid: e365f8649eb3e6f459a7c9afed5c603b, type: 3}
+  _itemModelingForDropping: {fileID: 255703738863542009, guid: c64d4cade2c2e3c48ac1662cd09d0432, type: 3}
+  _itemModelingForEquipment: {fileID: 8725849294108728461, guid: f0597553dac853d4f821364dbe74b08c, type: 3}
+  _groundYOffset: 0
+  _atkStyle: 1
+  _minAtk: 15
+  _maxAtk: 20
+  _atkRange: 2.5
+  _atkSpeed: 0.67
+  _maxAtkCount: 3
+  _rangeType: 1

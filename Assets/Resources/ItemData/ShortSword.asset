@@ -9,18 +9,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d043f520a6fde064fb80896f6fa0821f, type: 3}
+  m_Script: {fileID: 11500000, guid: a6ca888c73527974b9a5303eae0ab1d9, type: 3}
   m_Name: ShortSword
   m_EditorClassIdentifier: 
   width: 1
   height: 2
-  itemName: ShortSword
-  itemIcon: {fileID: 21300000, guid: 294126e7cddccd84a96aedc42153e674, type: 3}
-  itemModelingForDropping: {fileID: 7687733987665005634, guid: 152af13e88ad3bb4a880c998d6227ac5, type: 3}
-  itemModelingForEquipment: {fileID: 8515670019365848348, guid: b534d78e6efc5ab469c8fb9b24bf9377, type: 3}
-  groundYOffset: 0
-  type: 2
-  minAtk: 12
-  maxAtk: 20
-  def: 0
-  durability: 12
+  _itemName: ShortSword
+  _itemIcon: {fileID: 21300000, guid: 294126e7cddccd84a96aedc42153e674, type: 3}
+  _itemModelingForDropping: {fileID: 7687733987665005634, guid: 152af13e88ad3bb4a880c998d6227ac5, type: 3}
+  _itemModelingForEquipment: {fileID: 8515670019365848348, guid: b534d78e6efc5ab469c8fb9b24bf9377, type: 3}
+  _groundYOffset: 0
+  _atkStyle: 1
+  _minAtk: 12
+  _maxAtk: 15
+  _atkRange: 2.5
+  _atkSpeed: 0.5
+  _maxAtkCount: 4
+  _rangeType: 1

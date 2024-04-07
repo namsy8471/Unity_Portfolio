@@ -11,7 +11,8 @@ public class RayManager
 
     private Collider _hitCollider;
     private Vector3 _hitPoint;
-    
+
+    private LayerMask _layerMask;
     private const float SphereRadius = 50.0f; // 마우스 히트 포인트에서 타게팅이 가능한 범위
     
     public Collider RayHitCollider => _hitCollider;
@@ -19,6 +20,7 @@ public class RayManager
     public void Init()
     {
         Managers.Game.TargetingSystem.SetSetClosestEnemyCollider(SetClosestEnemyCollider);
+        _layerMask = ~LayerMask.GetMask("Player");
     }
 
     public void Update()
@@ -28,12 +30,13 @@ public class RayManager
 
     private void CastRay()
     {
+        if (EventSystem.current.IsPointerOverGameObject()) return;
         if (Util.IsMousePointerOutOfScreen()) return;
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         
-        if (Physics.Raycast(ray, out hit, 100f))
+        if (Physics.Raycast(ray, out hit, 100f, _layerMask))
         {
             CheckingIsTriggerOn(hit, ray);
         }
@@ -55,7 +58,6 @@ public class RayManager
         else
         {
             SaveHitInfo(hit);
-            Debug.Log("Collider which is not isTrigger on = " + hit.collider.name);
         }
     }
 
