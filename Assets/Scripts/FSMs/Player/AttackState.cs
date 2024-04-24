@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Contents.Status;
+using UnityEditor.Timeline.Actions;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -14,49 +16,68 @@ public class AttackState : IStateBase
      * 대미지 => 플레이어 스탯에서!
      * 최대 공격횟수 => 플레이어스탯
      */
-     
-    private float _lastAttackCooldown;
-    private float _attackTimer;
     
     private Animator _animator;
-
+    
+    public float LastAttackCooldown { get; private set; }
+    public float AttackTimer { get; private set; }
+    public float AttackCount { get; private set; }
+    
     public void Init()
     {
         _animator = Managers.Game.Player.GetComponentInChildren<Animator>();
         
-        _lastAttackCooldown = 2.0f;
-        _attackTimer = 0;
+        LastAttackCooldown = 2.0f;
+        AttackTimer = 0;
+        AttackCount = 0;
     }
 
     public void StartState()
     {
-        _attackTimer = 0;
+        AttackTimer = 0;
 
         Debug.Log("Attack State Start");
+
+        var player = Managers.Game.Player.GetComponent<PlayerController>();
+
+        player.IsAttackReserved = false;
         
-        if (Managers.Game.Player.GetComponent<Stat>().Stamina < 3f) return;
-        Managers.Game.Player.GetComponent<Stat>().Stamina -= 3f;
-        
-        switch (Managers.Game.Player.GetComponent<PlayerStat>().AtkStyle)
+        var playerSkill = player.CurrentSkill;
+        if (playerSkill != null)
         {
-            case ItemDataWeapon.AttackStyle.Punch:
-                _animator.Play("HandAtk" + Random.Range(1, 4));
-                break;
-            case ItemDataWeapon.AttackStyle.Sword:
-                _animator.Play("Atk" + Random.Range(1, 4));
-                break;
-            case ItemDataWeapon.AttackStyle.Bow:
-                break;
-            case ItemDataWeapon.AttackStyle.Wand:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            player.SetRootAnimFalseInvoke();
+            playerSkill.UseSkill();
+        }
+        
+        else
+        {
+            if (player.Status.Stamina < 3f) return;
+            player.Status.Stamina -= 3f;
+            AttackCount++;
+
+            switch (player.Status.AtkStyle)
+            {
+                case ItemDataWeapon.AttackStyle.Punch:
+                    _animator.Play("HandAtk" + Random.Range(1, 4));
+                    break;
+                case ItemDataWeapon.AttackStyle.Sword:
+                    _animator.Play("Atk" + Random.Range(1, 4));
+                    break;
+                case ItemDataWeapon.AttackStyle.Bow:
+                    break;
+                case ItemDataWeapon.AttackStyle.Wand:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 
     public void UpdateState()
     {
         Debug.Log("Attack State Update");
+
+        AttackTimer += Time.deltaTime;
 
         // _attackTimer += Time.deltaTime;
         //
@@ -108,84 +129,25 @@ public class AttackState : IStateBase
     public void EndState()
     {
         Debug.Log("Attack State End!");
+        //Managers.Game.TargetingSystem.Target = null;
         // _atkState = AtkState.Idle;
     }
     
     public void Attack()
     {
-        var targetPos = Managers.Game.TargetingSystem.GetCurrentTarget().transform.position;
-        targetPos.y = Managers.Game.Player.transform.position.y;
+        var player = Managers.Game.Player;
+        var targetSys = Managers.Game.TargetingSystem;
         
-        Managers.Game.Player.transform.LookAt(targetPos);
+        var targetPos = targetSys.IsCurrentTargetExist() ?
+            targetSys.GetCurrentTarget().transform.position :
+            player.GetComponent<PlayerController>().IdleState.DestPos;
         
-        Managers.Game.TargetingSystem.GetCurrentTarget().GetComponent<EnemyFSM>().
-            GetDamage(Managers.Game.Player.GetComponent<Stat>().DownGaugeToHit);
+        targetPos.y = player.transform.position.y;
         
-        Managers.Input.StopInputUpdate();
-        IEnumerator coroutine = RestartInputUpdate();
-
-        Debug.Log("코루틴 작동 전");
-
-        while (coroutine.MoveNext())
-        {
-            Debug.Log("코루틴 작동");
-        }
-    }
-
-    IEnumerator RestartInputUpdate()
-    {
-        yield return new WaitForSeconds(Managers.Game.Player.GetComponent<PlayerStat>().AtkSpeed);
-        AttackEnd();
-        Debug.Log("코루틴 종료");
-    }
-    
-    private void AttackEnd()
-    {
-        Managers.Input.StartInputUpdate();
-    }
-
-    private void ChangeState()
-    {
-        // switch (_atkState)
-        // {
-        //     case AtkState.Idle:
-        //         break;
-        //     case AtkState.Atk1:
-        //         break;
-        //     case AtkState.Atk2:
-        //         break;
-        //     case AtkState.Atk3:
-        //         break;
-        //     default:
-        //         break;
-        // }
-        //
-        // _atkState = state;
-        // _attackTimer = 0;
-        //
-        // switch (_atkState)
-        // {
-        //     case AtkState.Idle:
-        //         break;
-        //     case AtkState.Atk1:
-        //         _animator.SetTrigger("Attack");
-        //         Attack();
-        //         break;
-        //     case AtkState.Atk2:
-        //         _animator.SetTrigger("NextAttack");
-        //         Attack();
-        //         break;
-        //     case AtkState.Atk3:
-        //         _animator.SetTrigger("LastAttack");
-        //         Attack();
-        //         break;
-        //     case AtkState.AtkFinish:
-        //         Managers.Game.Player.gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
-        //         break;
-        //     default:
-        //         break;
-        // }
+        player.transform.LookAt(targetPos);
         
+        // Managers.Game.TargetingSystem.GetCurrentTarget().GetComponent<EnemyController>().
+        //     GetDamage(player.GetComponent<PlayerController>().Status.DownGaugeToHit);
     }
     
 }

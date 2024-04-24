@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 public class VisualManager
 {
@@ -10,20 +11,35 @@ public class VisualManager
     // 이 매니저는 이미지나 라인 렌더러, 파티클 등의 시각 효과를 담당합니다.
 
     private GameObject _imageCanvas;
+    private GameObject _skillBubbleCanvas;
     
     private LineRenderer _lineRenderer;
     
     private GameObject _circleImage;
-    private float _circleSize = 50f;
+    private readonly float _circleSize = 50f;
     private float _rotationOffset = 0;
-    
+
+    private GameObject _skillBubbleIcon;
+
+    public GameObject ImageCanvas => _imageCanvas;
+    public Image SkillIconInBubble { get; private set; }
+
     public void Init()
     {
         _imageCanvas = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/UI/ImageCanvas"));
-
+        _imageCanvas.GetComponent<Canvas>().sortingOrder = 1;
+        
+        _skillBubbleCanvas = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/UI/UI_SkillFloatingIcon/UI_SkillBubbleCanvas"),
+            GameObject.FindWithTag("Player").transform);
+        _skillBubbleCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
+        _skillBubbleCanvas.transform.position = 
+            _skillBubbleCanvas.transform.parent.transform.position
+            + Vector3.up * (GameObject.FindWithTag("Player").GetComponent<Collider>().bounds.size.y + 0.4f);
+        
         TargetingCircleInit();
         LineRendererInit();
-
+        SkillFloatingIconInit();
+        
         #region Action Binding
         
         // These functions use in Targeting System.
@@ -35,6 +51,12 @@ public class VisualManager
         #endregion
     }
 
+    public void Update()
+    {
+        if(_skillBubbleIcon.activeSelf == true)
+            UpdateSkillFloatingIcon();
+    }
+    
     private void TargetingCircleInit()
     {
         _circleImage = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/UI/TargetingCircle/TargetingCircle"),
@@ -45,7 +67,7 @@ public class VisualManager
 
     private void LineRendererInit()
     {
-        _lineRenderer = Managers.ManagersGO.AddComponent<LineRenderer>();
+        _lineRenderer = Managers.ManagersGo.AddComponent<LineRenderer>();
         _lineRenderer.material = Resources.Load<Material>("Materials/LineRenderer");
         _lineRenderer.startColor = Color.cyan;
         _lineRenderer.endColor = Color.cyan;
@@ -54,6 +76,16 @@ public class VisualManager
         _lineRenderer.positionCount = 0;
 
         _lineRenderer.shadowCastingMode = ShadowCastingMode.Off;
+    }
+
+    private void SkillFloatingIconInit()
+    {
+        _skillBubbleIcon = GameObject.Instantiate(Resources.Load<GameObject>
+                ("Prefabs/UI/UI_SkillFloatingIcon/UI_SkillFloatingIcon"),
+            _skillBubbleCanvas.transform);
+        
+        SkillIconInBubble = _skillBubbleIcon.transform.GetChild(0).GetComponent<Image>();
+        _skillBubbleIcon.SetActive(false);
     }
 
     private void DrawCircleOnEnemy(Vector3 currentTargetPos)
@@ -82,6 +114,18 @@ public class VisualManager
         _lineRenderer.SetPosition(1, targetPosition);
     }
 
+    public void DrawSkillFloatingIcon<T>(T skill) where T : ActiveSkill
+    {
+        _skillBubbleIcon.SetActive(true);
+        _skillBubbleIcon.GetComponent<UI_SkillFloatingIcon>().Skill = skill;
+        SkillIconInBubble.sprite = skill.SkillIcon;
+    }
+
+    private void UpdateSkillFloatingIcon()
+    {
+        _skillBubbleIcon.transform.LookAt(Camera.main.transform);
+    }
+
     private void ClearTargetingCircle()
     {
         _circleImage.SetActive(false);
@@ -90,5 +134,12 @@ public class VisualManager
     private void ClearTargetingLineRenderer()
     {
         _lineRenderer.positionCount = 0;
+    }
+    
+    public void ClearSkillFloatingIcon()
+    {
+        SkillIconInBubble.sprite = null;
+        _skillBubbleIcon.GetComponent<UI_SkillFloatingIcon>().Skill = null;
+        _skillBubbleIcon.SetActive(false);
     }
 }

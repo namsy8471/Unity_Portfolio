@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4477601261116445102}
   - component: {fileID: 4477601261116445103}
   - component: {fileID: 4477601261116445100}
-  - component: {fileID: 3254990690140107164}
+  - component: {fileID: 418454515958216449}
   m_Layer: 5
   m_Name: CloseButton
   m_TagString: Untagged
@@ -122,20 +122,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4477601261116445103}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 4477601262277782079}
-        m_TargetAssemblyTypeName: UI_InventoryUpperBar, Assembly-CSharp
-        m_MethodName: CloseButtonClick
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
---- !u!114 &3254990690140107164
+      m_Calls: []
+--- !u!114 &418454515958216449
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -144,7 +132,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4477601261116445098}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88c792914cf8ba14aae26656c4c6d2e4, type: 3}
+  m_Script: {fileID: 11500000, guid: 2a38d132a36518843a83385f3d16cd09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &4477601261390956256
@@ -351,6 +339,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4477601261976165359}
+  - component: {fileID: 4795350965819706422}
   m_Layer: 5
   m_Name: UI_BackpackInventory
   m_TagString: Untagged
@@ -380,6 +369,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0, y: 1}
+--- !u!114 &4795350965819706422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4477601261976165356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64db84de98dd8e5498fd0cabbaabbf68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4477601262277782075
 GameObject:
   m_ObjectHideFlags: 0
@@ -391,7 +392,7 @@ GameObject:
   - component: {fileID: 4477601262277782074}
   - component: {fileID: 4477601262277782076}
   - component: {fileID: 4477601262277782077}
-  - component: {fileID: 4477601262277782079}
+  - component: {fileID: 392807042801411543}
   m_Layer: 5
   m_Name: InventoryHandle
   m_TagString: Untagged
@@ -458,7 +459,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &4477601262277782079
+--- !u!114 &392807042801411543
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -467,6 +468,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 4477601262277782075}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 334a6f91c873a144b9f79e9c86137f0e, type: 3}
+  m_Script: {fileID: 11500000, guid: 8d887848348d9de4e9be21c6e4b3b5d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

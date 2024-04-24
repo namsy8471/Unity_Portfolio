@@ -5,23 +5,21 @@ using UnityEngine;
 
 public class GameManager
 {
-    private GameObject _player;
-    
     private PoolingManager _poolingManager = new PoolingManager();
     private InventoryController _inventoryController = new InventoryController();
     private TargetingSystem _targetingSystem = new TargetingSystem();
     private SkillSystem _sKillSystem = new SkillSystem();
 
-    public GameObject Player => _player;
+    public GameObject Player { get; private set; }
     public PoolingManager PoolingManager => _poolingManager;
     public InventoryController InventoryController => _inventoryController;
     public TargetingSystem TargetingSystem => _targetingSystem;
     public SkillSystem SkillSystem => _sKillSystem;
-    
+
     public void Init()
     {
-        _player = GameObject.FindWithTag("Player");
-        
+        Player = GameObject.FindWithTag("Player");
+
         _poolingManager.Init();
         _targetingSystem.Init();
         _inventoryController.Init();
@@ -32,6 +30,6 @@ public class GameManager
     {
         _targetingSystem.Update();
         _inventoryController.Update();
+        _sKillSystem.Update();
     }
-    
 }

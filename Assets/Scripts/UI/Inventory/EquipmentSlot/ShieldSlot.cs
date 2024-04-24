@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Contents.Status;
 using UnityEngine;
 
 public class ShieldSlot : EquipmentSlot
@@ -22,13 +23,13 @@ public class ShieldSlot : EquipmentSlot
     {
         base.EquipItem(isSwitching);
         
-        Managers.Game.Player.GetComponent<Stat>().Def += 
+        Managers.Game.Player.GetComponent<Status>().Def += 
             (CurrentEquipmentItem.ItemData as ItemDataArmor).Def;
     }
 
     protected override void UnequipItem(bool isSwitching)
     {
-        Managers.Game.Player.GetComponent<Stat>().Def -= 
+        Managers.Game.Player.GetComponent<Status>().Def -= 
             (CurrentEquipmentItem.ItemData as ItemDataArmor).Def;
         
         base.UnequipItem(isSwitching);

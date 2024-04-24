@@ -19,16 +19,16 @@ public class RayManager
     public Vector3 RayHitPoint => _hitPoint;
     public void Init()
     {
-        Managers.Game.TargetingSystem.SetSetClosestEnemyCollider(SetClosestEnemyCollider);
+        Managers.Game.TargetingSystem.SetSetClosestEnemyCollider(setClosestEnemyCollider);
         _layerMask = ~LayerMask.GetMask("Player");
     }
 
     public void Update()
     {
-        CastRay();
+        castRay();
     }
 
-    private void CastRay()
+    private void castRay()
     {
         if (EventSystem.current.IsPointerOverGameObject()) return;
         if (Util.IsMousePointerOutOfScreen()) return;
@@ -38,39 +38,38 @@ public class RayManager
         
         if (Physics.Raycast(ray, out hit, 100f, _layerMask))
         {
-            CheckingIsTriggerOn(hit, ray);
+            checkingIsTriggerOnRecersive(hit, ray);
         }
 
-        //Debug.DrawRay(ray.origin, ray.direction * 100f, Color.green);
     }
 
-    private void CheckingIsTriggerOn(RaycastHit hit, Ray ray)
+    private void checkingIsTriggerOnRecersive(RaycastHit hit, Ray ray)
     {
         if (hit.collider.isTrigger)
         {
-            Debug.DrawRay(hit.point, ray.direction * 100f, Color.blue);
             if (Physics.Raycast(hit.point, ray.direction, out hit, 100f))
             {
-                CheckingIsTriggerOn(hit, ray);
+                checkingIsTriggerOnRecersive(hit, ray);
             }
         }
             
         else
         {
-            SaveHitInfo(hit);
+            saveHitInfo(hit);
         }
     }
 
-    void SaveHitInfo(RaycastHit hit)
+    private void saveHitInfo(RaycastHit hit)
     {
         _hitCollider = hit.collider;
         _hitPoint = hit.point;
     }
 
-    private void SetClosestEnemyCollider()
+    private void setClosestEnemyCollider()
     {
         Collider[] colliders = Physics.OverlapSphere(_hitPoint, SphereRadius, 1 << LayerMask.NameToLayer("Enemy"));
         
+            
         if (colliders.Length > 0)
         {
             var closestDistance = Mathf.Infinity;

@@ -8,11 +8,11 @@ public class Managers : MonoBehaviour
     private static Managers _instance = null;
     static Managers Instance { get { Init(); return _instance; } }
     
-    private InputManager _input = new InputManager();
-    private SoundManager _sound = new SoundManager();
-    private GraphicsManager _graphics = new GraphicsManager();
-    private RayManager _ray = new RayManager();
-    private GameManager _game = new GameManager();
+    private readonly InputManager _input = new InputManager();
+    private readonly SoundManager _sound = new SoundManager();
+    private readonly GraphicsManager _graphics = new GraphicsManager();
+    private readonly RayManager _ray = new RayManager();
+    private readonly GameManager _game = new GameManager();
 
     public static InputManager Input => Instance._input;
     public static SoundManager Sound => Instance._sound;
@@ -20,7 +20,7 @@ public class Managers : MonoBehaviour
     public static RayManager Ray => Instance._ray;
     public static GameManager Game => Instance._game;
     
-    public static GameObject ManagersGO { get; private set; }
+    public static GameObject ManagersGo { get; private set; }
 
     private void Start()
     {
@@ -31,15 +31,15 @@ public class Managers : MonoBehaviour
     {
         if (_instance == null)
         {
-            ManagersGO = GameObject.Find("@Managers");
-            if (ManagersGO == null)
+            ManagersGo = GameObject.Find("@Managers");
+            if (ManagersGo == null)
             {
-                ManagersGO = new GameObject { name = "@Managers" };
-                ManagersGO.AddComponent<Managers>();
+                ManagersGo = new GameObject { name = "@Managers" };
+                ManagersGo.AddComponent<Managers>();
             }
             
-            DontDestroyOnLoad(ManagersGO);
-            _instance = ManagersGO.GetComponent<Managers>();
+            DontDestroyOnLoad(ManagersGo);
+            _instance = ManagersGo.GetComponent<Managers>();
             
             Input.Init();
             Sound.Init();

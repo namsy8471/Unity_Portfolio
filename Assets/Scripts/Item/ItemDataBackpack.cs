@@ -14,31 +14,21 @@ public class ItemDataBackpack : ItemData
     
     private ItemGrid _itemGrid;
     
-    private bool _isOpen;
-    
     public override void Init()
     {
-        _isOpen = false;
-        
-        //가방 만들기
-        //if (_inventory == null)
-        {
-            _inventory = Instantiate(_inventoryPrefab, Managers.Graphics.UI.MainInventory.gameObject.transform.position + Vector3.up * 200, Quaternion.identity,
-                Managers.Graphics.UI.InventoryUICanvas.transform);
-            _inventory.transform.SetAsFirstSibling();
-            _inventory.GetComponentInChildren<Inventory_Sub>().Init(_inventoryWidth, _inventoryHeight);
-            Managers.Graphics.UI.InventoryList.Add(_inventory.GetComponentInChildren<Inventory_Sub>());
-            _inventory.gameObject.SetActive(_isOpen);
-        }
+        _inventory = Instantiate(_inventoryPrefab, Managers.Graphics.UI.MainInventory.gameObject.transform.position + Vector3.up * 200, Quaternion.identity,
+            Managers.Graphics.UI.InventoryUICanvas.transform);
+        _inventory.transform.SetAsFirstSibling();
+        _inventory.GetComponentInChildren<Inventory_Sub>().Init(_inventoryWidth, _inventoryHeight);
+        Managers.Graphics.UI.InventoryList.Add(_inventory.GetComponentInChildren<Inventory_Sub>());
+        _inventory.gameObject.SetActive(false);
         
         Debug.Log("가방 만들어짐!");
-
     }
+    
     public override void UseItem()
     {
-        // 가방 열기 및 닫기
-        _isOpen = !_isOpen;
-        _inventory.gameObject.SetActive(_isOpen);
+        _inventory.gameObject.SetActive(!_inventory.gameObject.activeSelf);
         Debug.Log("가방 사용됨!");
     }
 
@@ -51,7 +41,6 @@ public class ItemDataBackpack : ItemData
 
     public override void PickUpItem()
     {
-        _isOpen = false;
-        _inventory.gameObject.SetActive(_isOpen);
+        _inventory.gameObject.SetActive(false);
     }
 }

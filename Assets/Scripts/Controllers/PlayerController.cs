@@ -1,9 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using Contents.Status;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
@@ -11,78 +10,90 @@ public class PlayerController : MonoBehaviour
     private enum PlayerState
     {
         Idle,
-        Move,
         Attack,
-        GetDamage
+        GetDamage,
+        Down
     }
+    
+    private bool _isBattle;
+    private Animator _animator;
+    
+    [SerializeField] private float _healRegenTimer;
+    [SerializeField] private float _healRegenTimeLimit;
+    [SerializeField] private PlayerState currentState;
 
-    private readonly IdleState _idleState = new IdleState();
-    private readonly MoveState _moveState = new MoveState();
-    private readonly AttackState _attackState = new AttackState();
-    private readonly GetDamageState _getDamageState = new GetDamageState();
+    public ActiveSkill CurrentSkill { get; set; }
+    
+    public IdleState IdleState { get; } = new IdleState();
+    public AttackState AttackState { get; } = new AttackState();
+    public GetDamageState GetDamageState { get; } = new GetDamageState();
+    public PlayerStatus Status { get; private set; }
 
     private List<Action> _playerMouseDownActions = new List<Action>();
     private List<Action> _playerMousePressedActions = new List<Action>();
-    
-    private bool isBattle;
-    private Animator _animator;
-
-    private float _healRegenTimer;
-    private float _healRegenTimeLimit;
-    
-    public MoveState MoveState => _moveState;
-    public AttackState AttackState => _attackState;
-    
     public List<Action> PlayerMouseDownActions => _playerMouseDownActions;
     public List<Action> PlayerMousePressedActions => _playerMousePressedActions;
-    
-    [SerializeField] private PlayerState currentState;
-    
+
+    public bool IsAttackReserved { get; set;}
+
     private void Start()
     {
-        isBattle = false;
-        
+        _isBattle = false;
         _animator = GetComponentInChildren<Animator>();
         
         _healRegenTimeLimit = 5;
         _healRegenTimer = _healRegenTimeLimit;
+
+        CurrentSkill = new ActiveSkill();
         
         #region KeyBinding in InputManager
-        Managers.Input.KeyButtonDown.Add(Managers.Input.PostureChangeKey, PostureChangeFunction);
         
-        Managers.Input.AddAction(Managers.Input.KeyButtonPressed, Managers.Input.MoveForwardKey, ChangeToMoveState);
-        Managers.Input.AddAction(Managers.Input.KeyButtonPressed, Managers.Input.MoveBackwardKey, ChangeToMoveState);
-        Managers.Input.AddAction(Managers.Input.KeyButtonPressed, Managers.Input.MoveLeftKey, ChangeToMoveState);
-        Managers.Input.AddAction(Managers.Input.KeyButtonPressed, Managers.Input.MoveRightKey, ChangeToMoveState);
+        Managers.Input.AddAction(Managers.Input.KeyButtonDown, Managers.Input.PostureChangeKey, PostureChangeFunction);
+        Managers.Input.AddAction(Managers.Input.KeyButtonDown, Managers.Input.SkillQuitKey, CurrentSkill.StopSkill);
         
-        Managers.Input.LMBPressed += ChangeToMoveState;
+        Managers.Input.LMBDown += ReserveAttack;
+        PlayerMouseDownActions.Add(ReserveAttack);
         
-        _playerMousePressedActions.Add(ChangeToMoveState);
         #endregion
         
-        _idleState.Init();
-        _moveState.Init();
-        _attackState.Init();
-        _getDamageState.Init();
+        Status = new PlayerStatus();
+        
+        IdleState.Init();
+        AttackState.Init();
+        GetDamageState.Init();
+
+        Managers.Graphics.UI.BindingSliderWithPlayerStatus();
+        
+        Managers.Game.SkillSystem.AddSkill(new Smash());
+        Managers.Game.SkillSystem.AddSkill(new Defence());
+
+        CurrentSkill = null;
     }
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            //Managers.Game.Player.GetComponentInChildren<Animator>().Play("Smash");
+            Managers.Game.SkillSystem.AddSkill(Managers.Game.SkillSystem.SkillSmash);
+            // smash.UseSkill();
+        }
+        
         switch (currentState)
         {
             case PlayerState.Idle:
-            case PlayerState.Move:
                 if (_healRegenTimer <= 0)
                 {
-                    Managers.Game.Player.GetComponent<Stat>().Hp += 0.01f;
-                    Managers.Game.Player.GetComponent<Stat>().Mp += 0.01f;
-                    Managers.Game.Player.GetComponent<Stat>().Stamina += 0.01f;
+                    Status.Hp += 0.01f;
+                    Status.Mp += 0.01f;
+                    Status.Stamina += 0.01f;
                 }
                 else _healRegenTimer -= Time.deltaTime;
                 break;
             
             case PlayerState.Attack:
             case PlayerState.GetDamage:
+            case PlayerState.Down:
                 _healRegenTimer = _healRegenTimeLimit;
                 break;
             default:
@@ -91,35 +102,21 @@ public class PlayerController : MonoBehaviour
         
         switch (currentState)
         {
-            case PlayerState.Idle:
-                
-                if (Managers.Game.TargetingSystem.IsCurrentTargetExist()
-                    && Managers.Game.TargetingSystem.GetCurrentTarget().layer == LayerMask.NameToLayer("Enemy")
-                    && Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position) < Managers.Game.Player.GetComponent<Stat>().AtkRange)
-                {
-                    ChangeState(PlayerState.Attack);
-                    break;
-                }
-                
-                _idleState.UpdateState();
-
-                break;
-            
             case PlayerState.Attack:
 
-                if (!Managers.Game.TargetingSystem.IsCurrentTargetExist())
+                if (AttackState.AttackTimer >= Status.AtkSpeed && !_animator.applyRootMotion)
                 {
                     ChangeState(PlayerState.Idle);
                     break;
                 }
                 
-                _attackState.UpdateState();
+                AttackState.UpdateState();
 
                 break;
             
             case PlayerState.GetDamage:
                 
-                _getDamageState.UpdateState();
+                GetDamageState.UpdateState();
                 
                 break;
             
@@ -132,25 +129,15 @@ public class PlayerController : MonoBehaviour
     {
         switch (currentState)
         {
-            case PlayerState.Move:
-
-                if (_moveState.IsMoveDone)
+            case PlayerState.Idle:
+                
+                IdleState.UpdateState();
+                
+                if (IsAttackReserved)
                 {
-                    ChangeState(PlayerState.Idle);
-                    break;
-                }
-
-                if (Managers.Game.TargetingSystem.IsCurrentTargetExist()
-                    && Managers.Game.TargetingSystem.GetCurrentTarget().layer == LayerMask.NameToLayer("Enemy")
-                    && Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position,
-                        transform.position) <  Managers.Game.Player.GetComponent<Stat>().AtkRange)
-                {
-                    ChangeState(PlayerState.Attack);
-                    break;
+                    Attack();
                 }
                 
-                _moveState.UpdateState();
-
                 break;
             
             default:
@@ -162,13 +149,13 @@ public class PlayerController : MonoBehaviour
     {
         if (Managers.Game.TargetingSystem.IsCurrentTargetExist())
         {
-            isBattle = true;
-            _animator.SetBool("isBattle", isBattle);
+            _isBattle = true;
+            _animator.SetBool("isBattle", _isBattle);
             return;
         }
         
-        isBattle = !isBattle;
-        _animator.SetBool("isBattle", isBattle);
+        _isBattle = !_isBattle;
+        _animator.SetBool("isBattle", _isBattle);
     }
     
     private void ChangeState(PlayerState newState)
@@ -178,19 +165,15 @@ public class PlayerController : MonoBehaviour
         switch (currentState)
         {
             case PlayerState.Idle:
-                _idleState.EndState();
-                break;
-            
-            case PlayerState.Move:
-                _moveState.EndState();
+                IdleState.EndState();
                 break;
             
             case PlayerState.Attack:
-                _attackState.EndState();
+                AttackState.EndState();
                 break;
             
             case PlayerState.GetDamage:
-                _getDamageState.EndState();
+                GetDamageState.EndState();
                 break;
             
             default:
@@ -202,19 +185,15 @@ public class PlayerController : MonoBehaviour
         switch (currentState)
         {
             case PlayerState.Idle:
-                _idleState.StartState();
-                break;
-            
-            case PlayerState.Move:
-                _moveState.StartState();
+                IdleState.StartState();
                 break;
             
             case PlayerState.Attack:
-                _attackState.StartState();
+                AttackState.StartState();
                 break;
             
             case PlayerState.GetDamage:
-                _getDamageState.StartState();
+                GetDamageState.StartState();
                 break;
             
             default:
@@ -233,9 +212,46 @@ public class PlayerController : MonoBehaviour
         ChangeState(PlayerState.Idle);
     }
 
-    private void ChangeToMoveState()
+    private void SetRootAnimationFalse()
     {
-        ChangeState(PlayerState.Move);
+        _animator.applyRootMotion = false;
+    }
+    
+    public void SetRootAnimFalseInvoke()
+    {
+        Invoke(nameof(SetRootAnimationFalse), CurrentSkill.SkillUseAnimClip.length + 0.1f);
+    }
+
+    private void ReserveAttack()
+    {
+        if (Managers.Game.TargetingSystem.IsCurrentTargetExist())
+            IsAttackReserved = true;
+        else
+            IsAttackReserved = Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Enemy");
+    }
+    
+    private void Attack()
+    {
+        if (Input.GetKey(KeyCode.LeftControl))
+        {
+            if (Managers.Game.TargetingSystem.IsCurrentTargetExist()
+                && Managers.Game.TargetingSystem.GetCurrentTarget().layer == LayerMask.NameToLayer("Enemy")
+                && Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position)
+                <= ((CurrentSkill as AttackSkill)?.SkillRange ?? Status.AtkRange))
+            {
+                ChangeState(PlayerState.Attack);
+            }
+        }
+        
+        else
+        {
+            if (Vector3.Distance(Managers.Ray.RayHitPoint, transform.position)
+                <= ((CurrentSkill as AttackSkill)?.SkillRange ?? Status.AtkRange) 
+                && Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+            {
+                ChangeState(PlayerState.Attack);
+            }
+        }
     }
 
 }

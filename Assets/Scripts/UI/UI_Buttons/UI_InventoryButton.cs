@@ -1,12 +1,7 @@
-using System;
-using UnityEngine.EventSystems;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public class UI_InventoryButton : UI_Base, IPointerClickHandler
+public class UI_InventoryButton : UI_SharedCloseButton
 {
-    public Action CloseOrOpenInventory;
-    
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        CloseOrOpenInventory?.Invoke();
-    }
 }

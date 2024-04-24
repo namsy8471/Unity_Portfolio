@@ -26,5 +26,6 @@ public class GraphicsManager
     public void Update()
     {
         Cursor.Update();
+        Visual.Update();
     }
 }

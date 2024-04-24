@@ -20,6 +20,9 @@ public class InputManager
     #region KeyCodes and properties
 
     private KeyCode _inventoryKeyCode;
+    private KeyCode _characterStatusKeyCode;
+    private KeyCode _skillWindowKeyCode;
+    
     private KeyCode _inventoryItemRotateKeyCode;
     private KeyCode _postureChangeKeyCode;
 
@@ -30,8 +33,12 @@ public class InputManager
     private KeyCode _walkKeyCode;
 
     private KeyCode _targetingKeyCode;
+    private KeyCode _skillQuitKeyCode;
     
     public KeyCode InventoryKey => _inventoryKeyCode;
+    public KeyCode CharacterStatusKey => _characterStatusKeyCode;
+    public KeyCode SkillWindowKey => _skillWindowKeyCode;
+    
     public KeyCode InventoryItemRotateKey => _inventoryItemRotateKeyCode;
     public KeyCode PostureChangeKey => _postureChangeKeyCode;
     
@@ -39,10 +46,10 @@ public class InputManager
     public KeyCode MoveBackwardKey => _moveBackwardKeyCode;
     public KeyCode MoveLeftKey => _moveLeftKeyCode;
     public KeyCode MoveRightKey => _moveRightKeyCode;
-    
     public KeyCode WalkKey => _walkKeyCode;
 
     public KeyCode TargetingKey => _targetingKeyCode;
+    public KeyCode SkillQuitKey => _skillQuitKeyCode;
     
     #endregion
 
@@ -53,8 +60,10 @@ public class InputManager
     public void Init()
     {
         _inventoryKeyCode = KeyCode.I;
-        _inventoryItemRotateKeyCode = KeyCode.R;
+        _characterStatusKeyCode = KeyCode.C;
+        _skillWindowKeyCode = KeyCode.K;
         
+        _inventoryItemRotateKeyCode = KeyCode.R;
         _postureChangeKeyCode = KeyCode.Space;
 
         _moveForwardKeyCode = KeyCode.W;
@@ -65,6 +74,7 @@ public class InputManager
         _walkKeyCode = KeyCode.LeftShift;
 
         _targetingKeyCode = KeyCode.LeftControl;
+        _skillQuitKeyCode = KeyCode.Escape;
 
         InputUpdateState = true;
     }
