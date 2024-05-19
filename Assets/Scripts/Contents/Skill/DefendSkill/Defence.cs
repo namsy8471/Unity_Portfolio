@@ -22,8 +22,11 @@ public class Defence : DefendSkill
         MovingType = MoveType.Walk;
         SkillType = Type.Battle;
 
+        SkillCastAnimClip = null;
         SkillUseAnimClip =
             Resources.Load<AnimationClip>("Animation/Player/Skill/Defence/Defence");
+        
+        Managers.Game.Player.GetComponent<PlayerController>().Status += BonusStatus;
     }
 
     public override void CastSkill()

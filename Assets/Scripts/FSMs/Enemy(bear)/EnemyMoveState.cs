@@ -31,7 +31,7 @@ public class EnemyMoveState : IStateBase
     
     private GameObject _player;
     private Animator _animator;
-    private GameObject _controller;
+    private EnemyController _controller;
     
     private Transform _tr;
     private Rigidbody _rb;
@@ -48,11 +48,11 @@ public class EnemyMoveState : IStateBase
     private float _randomPatrolTime;
     
     private bool _patrolDone;
-    private bool _isFindPlayer;
+    public bool IsPlayerFound { get; set;}
 
     private Vector3 _randDirection;
 
-    public EnemyMoveState(GameObject go) => _controller = go;
+    public EnemyMoveState(GameObject go) => _controller = go.GetComponent<EnemyController>();
     
     public void Init()
     {
@@ -62,14 +62,14 @@ public class EnemyMoveState : IStateBase
         _rb = _controller.GetComponent<Rigidbody>();
 
         _patrolDone = false;
-        _isFindPlayer = false;
+        IsPlayerFound = false;
     }
 
     public void StartState()
     {
         // Debug.Log("Enemy Move State Update");
 
-        ChangeState(_isFindPlayer ? MovingState.Player : MovingState.Patrol);
+        ChangeState(IsPlayerFound ? MovingState.Player : MovingState.Patrol);
         ChangeState(WalkType.Walk);
         
         _patrolTimer = 0;
@@ -81,6 +81,10 @@ public class EnemyMoveState : IStateBase
     {
         // Debug.Log("Enemy Move State Update");
 
+        if (_controller.DownGauge > 0)
+            _controller.DownGauge -= Time.deltaTime;
+        else _controller.DownGauge = 0;
+        
         switch (_moveState)
         {
             case MovingState.Patrol:
@@ -232,10 +236,5 @@ public class EnemyMoveState : IStateBase
     public bool GetPatrolDone()
     {
         return _patrolDone;
-    }
-
-    public void SetFindPlayer(bool value)
-    {
-        _isFindPlayer = value;
     }
 }

@@ -2,91 +2,101 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Contents.Status;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : Controller
 {
-    private enum PlayerState
+    public enum PlayerState
     {
         Idle,
         Attack,
         GetDamage,
-        Down
+        Down,
+        Dead
     }
     
     private bool _isBattle;
-    private Animator _animator;
     
     [SerializeField] private float _healRegenTimer;
     [SerializeField] private float _healRegenTimeLimit;
     [SerializeField] private PlayerState currentState;
-
-    public ActiveSkill CurrentSkill { get; set; }
     
+    private List<Action> _playerMouseDownActions = new List<Action>();
+    private List<Action> _playerMousePressedActions = new List<Action>();
+    
+    public ActiveSkill CurrentSkill { get; set; }
     public IdleState IdleState { get; } = new IdleState();
     public AttackState AttackState { get; } = new AttackState();
     public GetDamageState GetDamageState { get; } = new GetDamageState();
-    public PlayerStatus Status { get; private set; }
+    public DownState DownState { get; } = new DownState();
+    public DeadState DeadState { get; } = new DeadState();
+    public PlayerStatus Status { get; set; }
 
-    private List<Action> _playerMouseDownActions = new List<Action>();
-    private List<Action> _playerMousePressedActions = new List<Action>();
     public List<Action> PlayerMouseDownActions => _playerMouseDownActions;
     public List<Action> PlayerMousePressedActions => _playerMousePressedActions;
 
     public bool IsAttackReserved { get; set;}
 
+    public float DownGauge { get; set; } = 0;
+
+    public EnemyController CurrentEnemy { get; set; }
+
     private void Start()
     {
         _isBattle = false;
-        _animator = GetComponentInChildren<Animator>();
+        Animator = GetComponent<Animator>();
         
-        _healRegenTimeLimit = 5;
+        _healRegenTimeLimit = 10;
         _healRegenTimer = _healRegenTimeLimit;
+        
+        gameObject.GetOrAddComponent<AudioSource>();
 
         CurrentSkill = new ActiveSkill();
         
         #region KeyBinding in InputManager
         
         Managers.Input.AddAction(Managers.Input.KeyButtonDown, Managers.Input.PostureChangeKey, PostureChangeFunction);
-        Managers.Input.AddAction(Managers.Input.KeyButtonDown, Managers.Input.SkillQuitKey, CurrentSkill.StopSkill);
         
         Managers.Input.LMBDown += ReserveAttack;
         PlayerMouseDownActions.Add(ReserveAttack);
         
         #endregion
         
-        Status = new PlayerStatus();
+        HpBarInit();
+        
+        Status = new PlayerStatus(gameObject);
         
         IdleState.Init();
         AttackState.Init();
         GetDamageState.Init();
+        DownState.Init();
+        DeadState.Init();
 
         Managers.Graphics.UI.BindingSliderWithPlayerStatus();
         
         Managers.Game.SkillSystem.AddSkill(new Smash());
         Managers.Game.SkillSystem.AddSkill(new Defence());
+        Managers.Game.SkillSystem.AddSkill(new CounterAttack());
 
+        
         CurrentSkill = null;
     }
 
-    private void Update()
+    protected override void Update()
     {
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            //Managers.Game.Player.GetComponentInChildren<Animator>().Play("Smash");
-            Managers.Game.SkillSystem.AddSkill(Managers.Game.SkillSystem.SkillSmash);
-            // smash.UseSkill();
-        }
+        base.Update();
         
         switch (currentState)
         {
             case PlayerState.Idle:
                 if (_healRegenTimer <= 0)
                 {
-                    Status.Hp += 0.01f;
-                    Status.Mp += 0.01f;
-                    Status.Stamina += 0.01f;
+                    Status.Hp += Time.deltaTime;
+                    Status.Mp += Time.deltaTime;
+                    Status.Stamina += Time.deltaTime;
+                    DownGauge -= Time.deltaTime;
                 }
                 else _healRegenTimer -= Time.deltaTime;
                 break;
@@ -94,6 +104,7 @@ public class PlayerController : MonoBehaviour
             case PlayerState.Attack:
             case PlayerState.GetDamage:
             case PlayerState.Down:
+            case PlayerState.Dead:
                 _healRegenTimer = _healRegenTimeLimit;
                 break;
             default:
@@ -104,7 +115,7 @@ public class PlayerController : MonoBehaviour
         {
             case PlayerState.Attack:
 
-                if (AttackState.AttackTimer >= Status.AtkSpeed && !_animator.applyRootMotion)
+                if (AttackState.AttackTimer <= 0)
                 {
                     ChangeState(PlayerState.Idle);
                     break;
@@ -115,9 +126,31 @@ public class PlayerController : MonoBehaviour
                 break;
             
             case PlayerState.GetDamage:
+
+                if (GetDamageState.Timer <= 0)
+                {
+                    ChangeState(PlayerState.Idle);
+                    break;
+                }
                 
                 GetDamageState.UpdateState();
                 
+                break;
+            
+            case PlayerState.Down:
+
+                if (DownState.Timer <= 0)
+                {
+                    ChangeState(PlayerState.Idle);
+                    break;
+                }
+                
+                DownState.UpdateState();
+
+                break;
+            case PlayerState.Dead:
+                
+                DeadState.UpdateState();
                 break;
             
             default:
@@ -133,7 +166,7 @@ public class PlayerController : MonoBehaviour
                 
                 IdleState.UpdateState();
                 
-                if (IsAttackReserved)
+                if (CurrentSkill is not DefendSkill && IsAttackReserved)
                 {
                     Attack();
                 }
@@ -150,15 +183,15 @@ public class PlayerController : MonoBehaviour
         if (Managers.Game.TargetingSystem.IsCurrentTargetExist())
         {
             _isBattle = true;
-            _animator.SetBool("isBattle", _isBattle);
+            Animator.SetBool("isBattle", _isBattle);
             return;
         }
         
         _isBattle = !_isBattle;
-        _animator.SetBool("isBattle", _isBattle);
+        Animator.SetBool("isBattle", _isBattle);
     }
     
-    private void ChangeState(PlayerState newState)
+    public void ChangeState(PlayerState newState)
     {
         if (currentState == newState) return;
         
@@ -176,6 +209,13 @@ public class PlayerController : MonoBehaviour
                 GetDamageState.EndState();
                 break;
             
+            case PlayerState.Down:
+                DownState.EndState();
+                break;
+            
+            case PlayerState.Dead:
+                DeadState.EndState();
+                break;
             default:
                 break;
         }
@@ -196,48 +236,88 @@ public class PlayerController : MonoBehaviour
                 GetDamageState.StartState();
                 break;
             
+            case PlayerState.Down:
+                DownState.StartState();
+                break;
+            case PlayerState.Dead:
+                DeadState.StartState();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void ChangeState(PlayerState newState, EnemyController enemyController)
+    {
+        switch (currentState)
+        {
+            case PlayerState.Idle:
+                IdleState.EndState();
+                break;
+            
+            case PlayerState.Attack:
+                AttackState.EndState();
+                break;
+            
+            case PlayerState.GetDamage:
+                GetDamageState.EndState();
+                break;
+            
+            case PlayerState.Down:
+                DownState.EndState();
+                break;
+            
+            default:
+                break;
+        }
+        
+        currentState = newState;
+
+        switch (currentState)
+        {
+            case PlayerState.Idle:
+                IdleState.StartState();
+                break;
+            
+            case PlayerState.Attack:
+                AttackState.StartState();
+                break;
+            
+            case PlayerState.GetDamage:
+                GetDamageState.StartState(enemyController);
+                break;
+            
+            case PlayerState.Down:
+                DownState.StartState();
+                break;
+            
             default:
                 break;
         }
     }
     
-    private void GetDamage(float value)
-    {
-        ChangeState(PlayerState.GetDamage);
-        gameObject.SendMessage("AddDownGauge", value, SendMessageOptions.DontRequireReceiver);
-    }
-
-    private void BackToIdle()
-    {
-        ChangeState(PlayerState.Idle);
-    }
-
-    private void SetRootAnimationFalse()
-    {
-        _animator.applyRootMotion = false;
-    }
-    
-    public void SetRootAnimFalseInvoke()
-    {
-        Invoke(nameof(SetRootAnimationFalse), CurrentSkill.SkillUseAnimClip.length + 0.1f);
-    }
-
     private void ReserveAttack()
     {
         if (Managers.Game.TargetingSystem.IsCurrentTargetExist())
             IsAttackReserved = true;
         else
             IsAttackReserved = Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Enemy");
+
+        _isBattle = IsAttackReserved || _isBattle;
+        Animator.SetBool("isBattle", _isBattle);
     }
     
     private void Attack()
     {
         if (Input.GetKey(KeyCode.LeftControl))
         {
-            if (Managers.Game.TargetingSystem.IsCurrentTargetExist()
-                && Managers.Game.TargetingSystem.GetCurrentTarget().layer == LayerMask.NameToLayer("Enemy")
-                && Vector3.Distance(Managers.Game.TargetingSystem.Target.transform.position, transform.position)
-                <= ((CurrentSkill as AttackSkill)?.SkillRange ?? Status.AtkRange))
+            var targetingSystem = Managers.Game.TargetingSystem;
+            
+            if (targetingSystem.IsCurrentTargetExist()
+                && targetingSystem.Target.layer == LayerMask.NameToLayer("Enemy")
+                && Vector3.Distance(targetingSystem.Target.transform.position, transform.position)
+                <= ((CurrentSkill as AttackSkill)?.SkillRange ?? Status.AtkRange)
+                && targetingSystem.Target.GetComponent<EnemyController>().InvincibleTimer <= 0)
             {
                 ChangeState(PlayerState.Attack);
             }
@@ -245,13 +325,36 @@ public class PlayerController : MonoBehaviour
         
         else
         {
-            if (Vector3.Distance(Managers.Ray.RayHitPoint, transform.position)
+            var ray = Managers.Ray;
+            
+            if (Vector3.Distance(ray.RayHitPointByMouseClicked, transform.position)
                 <= ((CurrentSkill as AttackSkill)?.SkillRange ?? Status.AtkRange) 
-                && Managers.Ray.RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+                && ray.RayHitColliderByMouseClicked.gameObject.layer == LayerMask.NameToLayer("Enemy")
+                && ray.RayHitColliderByMouseClicked.gameObject.GetComponent<EnemyController>().InvincibleTimer <= 0)
             {
+                if (ray.RayHitColliderByMouseClicked.gameObject.GetComponent<EnemyController>().State
+                    == EnemyController.EnemyState.Dead)
+                    return;
+                
                 ChangeState(PlayerState.Attack);
             }
         }
     }
+    
+    public void GetDamage(EnemyController enemyController)
+    {
+        CurrentEnemy = enemyController;
+        ChangeState(PlayerState.GetDamage, enemyController);
+    }
 
+    // Animation Event
+    private void AttackToEnemy() => AttackState.Attack(CurrentEnemy);
+
+    private void GetInvincibleTime()
+    {
+        InvincibleTimer = Animator.GetCurrentAnimatorStateInfo(0).length;
+        if(CurrentEnemy == null)
+            CurrentEnemy = Managers.Game.TargetingSystem.Target.GetComponent<EnemyController>();
+    }
+    private void PlaySound(string keyWord) => Managers.Sound.PlaySound(gameObject, keyWord);
 }

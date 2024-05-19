@@ -27,8 +27,7 @@ public class UI_SkillDescription : MonoBehaviour, IPointerDownHandler
         transform.Find("RankText").GetComponent<TextMeshProUGUI>().text
             = "랭크 " + Enum.GetName(typeof(Skill.Rank), SkillComponent.SkillRank);
 
-        var isValid = skill as ActiveSkill;
-        GetComponentInChildren<Button>().interactable = (isValid != null);
+        GetComponentInChildren<Button>().interactable = (skill is ActiveSkill);
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -39,9 +38,7 @@ public class UI_SkillDescription : MonoBehaviour, IPointerDownHandler
         {
             case "SkillIcon":
             {
-                Managers.Game.SkillSystem.CurrentSelectSkill = SkillComponent;
-                Managers.Game.SkillSystem.DragSkillIcon.SetActive(true);
-                Managers.Game.SkillSystem.DragSkillIcon.GetComponent<Image>().sprite = SkillComponent.SkillIcon;
+                Managers.Game.SkillSystem.StartDragSkill(SkillComponent);
                 break;
             }
             
@@ -55,9 +52,5 @@ public class UI_SkillDescription : MonoBehaviour, IPointerDownHandler
         }
     }
 
-    public void SkillUseButtonClick()
-    {
-        Debug.Log("스킬 사용버튼 클릭됨!");
-        (SkillComponent as ActiveSkill).CastSkill();
-    }
+    public void SkillUseButtonClick() => (SkillComponent as ActiveSkill)?.CastSkill();
 }

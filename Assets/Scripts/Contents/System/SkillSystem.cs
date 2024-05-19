@@ -6,16 +6,7 @@ using UnityEngine.UI;
 
 public class SkillSystem
 {
-    
-    // TODO
-    // 스킬을 받아온다.
-    // 스킬을 사용한다.
-    // 스킬 사용 시 플레이어에게 알린다.
-    // 현재 스킬이 사용 중인지 알린다.
-    // 스킬을 드래그 할 수 있다.
-
     public List<Skill> SkillsList;
-    public Smash SkillSmash;
     
     public GameObject DragSkillIcon { get; private set; }
     public Skill CurrentSelectSkill { get; set; }
@@ -27,11 +18,7 @@ public class SkillSystem
         
         DragSkillIconInit();
         
-        SkillSmash = new Smash();
-        SkillsList = new List<Skill>
-        {
-            SkillSmash
-        };
+        SkillsList = new List<Skill>();
     }
 
     private void DragSkillIconInit()
@@ -49,12 +36,37 @@ public class SkillSystem
     {
         if(CurrentSelectSkill != null)
             DragSkill();
+
+        foreach (var skill in SkillsList)
+        {
+            // 쿨타임 감지
+            var activeSkill = skill as ActiveSkill;
+            activeSkill?.CoolTimeUpdate();
+        }
     }
 
     private void DragSkill()
     {
         Debug.Log("DragSkill 작동 중");
         DragSkillIcon.transform.position = Input.mousePosition;
+
+        if (Input.GetMouseButton(1))
+        {
+            StopDragSkill();
+        }
+    }
+
+    public void StartDragSkill(Skill skill)
+    {
+        CurrentSelectSkill = skill;
+        DragSkillIcon.SetActive(true);
+        DragSkillIcon.GetComponent<Image>().sprite = skill.SkillIcon;
+    }
+
+    public void StopDragSkill()
+    {
+        CurrentSelectSkill = null;
+        DragSkillIcon.SetActive(false);
     }
     
     public void AddSkill<T>(T newSkill) where T : Skill
@@ -64,5 +76,6 @@ public class SkillSystem
             Managers.Graphics.UI.SkillUI.transform.Find("SkillWindow/WindowHandle/UI_Background/SkillDescriptions"));
 
         skillToAdd.GetComponent<UI_SkillDescription>().Init(newSkill);
+        SkillsList.Add(newSkill);
     }
 }

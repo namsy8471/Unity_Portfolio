@@ -6,14 +6,16 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
-public class EnemyController : MonoBehaviour
+public class EnemyController : Controller
 {
-    enum EnemyState
+    public enum EnemyState
     {
         Idle,
         Move,
         Attack,
-        GetDamage
+        GetDamage,
+        Down,
+        Dead
     }
 
     enum BattleState
@@ -22,56 +24,74 @@ public class EnemyController : MonoBehaviour
         Battle
     }
 
-    [SerializeField] private EnemyState _enemyState;
+    [SerializeField] public EnemyState State;
     [SerializeField] private BattleState _battleState;
     
     private EnemyIdleState _idleState;
     private EnemyMoveState _moveState;
     private EnemyAttackState _attackState;
     private EnemyGetDamageState _getDamageState;
+    private EnemyDownState _downState;
+    private EnemyDeadState _deadState;
     
-    private Animator _animator;
     private SphereCollider _detectCol;
     
-    private GameObject _player;
-
+    private PlayerController _player;
     private float _petrolTimer;
-    private bool _playerInRange;
+    
+    public float DownGauge { get; set; }
 
-    public Status Status { get; } = new Status();
+    //For Debug by Inspector
+    public float downGauge;
+    
+    public Status Status { get; set; }
 
     void Start()
     {
-        _animator = GetComponentInChildren<Animator>();
+        Animator = GetComponentInChildren<Animator>();
 
         _detectCol = GetComponentInChildren<SphereCollider>();
         GetComponentInChildren<EnemyDetectingBoundary>().TriggerEnter = OnTriggerEnterInDetectingCollider;
         GetComponentInChildren<EnemyDetectingBoundary>().TriggerExit = OnTriggerExitFromDetectingCollider;
         
-        _player = Managers.Game.Player;
+        _player = Managers.Game.Player.GetComponent<PlayerController>();
         
-        _enemyState = EnemyState.Idle;
+        State = EnemyState.Idle;
         _battleState = BattleState.Idle;
         
-        _animator.SetBool("Idle",true);
+        Animator.SetBool("Idle",true);
 
         _petrolTimer = 0;
-        _playerInRange = false;
+        DownGauge = 0;
         
-        _idleState = new EnemyIdleState(gameObject);
-        _moveState = new EnemyMoveState(gameObject);
-        _attackState = new EnemyAttackState(gameObject);
-        _getDamageState = new EnemyGetDamageState(gameObject);
+        var go = gameObject;
+
+        HpBarInit();
+        
+        Status = new Status(go);
+        
+        _idleState = new EnemyIdleState(go);
+        _moveState = new EnemyMoveState(go);
+        _attackState = new EnemyAttackState(go);
+        _getDamageState = new EnemyGetDamageState(go);
+        _downState = new EnemyDownState(go);
+        _deadState = new EnemyDeadState(go);
         
         _idleState.Init();
         _moveState.Init();
         _attackState.Init();
         _getDamageState.Init();
+        _downState.Init();
+        _deadState.Init();
     }
 
-    void Update()
+    protected override void Update()
     {
-        switch (_enemyState)
+        base.Update();
+
+        downGauge = DownGauge;
+        
+        switch (State)
         {
             case EnemyState.Idle:
                 if (_petrolTimer > 3)
@@ -81,7 +101,8 @@ public class EnemyController : MonoBehaviour
                     break;
                 }
                 
-                if (_playerInRange)
+                if (Vector3.Distance(_player.transform.position, transform.position) <= Status.AtkRange
+                    && _player.InvincibleTimer <= 0)
                 {
                     ChangeState(EnemyState.Attack);
                     break;
@@ -93,7 +114,7 @@ public class EnemyController : MonoBehaviour
             
             case EnemyState.Attack:
 
-                if (!_playerInRange && _attackState.GetAtkDone())
+                if (_attackState.Timer <= 0)
                 {
                     ChangeState(EnemyState.Move);
                     break;
@@ -104,9 +125,34 @@ public class EnemyController : MonoBehaviour
             
             case EnemyState.GetDamage:
                 
+                if (_getDamageState.Timer < 0)
+                {
+                    ChangeState(EnemyState.Idle);
+                    break;
+                }
+                
                 _getDamageState.UpdateState();
+                
                 break;
-            
+            case EnemyState.Down:
+                
+                if (_downState.Timer <= 0)
+                {
+                    ChangeState(EnemyState.Idle);
+                }
+                
+                _downState.UpdateState();
+                break;
+            case EnemyState.Dead:
+
+                if (_deadState.Timer <= 0)
+                {
+                    gameObject.SetActive(false);
+                }
+                
+                _deadState.UpdateState();
+                
+                break;
             default:
                 break;
         }
@@ -115,31 +161,38 @@ public class EnemyController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _playerInRange = Vector3.Distance(_player.transform.position, transform.position) <= _attackState.GetAttackRange();
-        
-        switch (_enemyState)
+        switch (State)
         {
             case EnemyState.Move:
-                if (_moveState.GetPatrolDone())
-                {
-                    ChangeState(EnemyState.Idle);
-                    break;
-                }
 
-                if (_playerInRange)
+                var isPlayerInAtkRange =
+                    Vector3.Distance(_player.transform.position, transform.position) <= Status.AtkRange;
+                
+                if (isPlayerInAtkRange && _player.InvincibleTimer <= 0)
                 {
                     ChangeState(EnemyState.Attack);
                     break;
                 } 
+                
+                if (isPlayerInAtkRange || _moveState.GetPatrolDone())
+                {
+                    ChangeState(EnemyState.Idle);
+                    break;
+                }
                 
                 _moveState.UpdateState();
                 break;
         }
     }
 
-    void ChangeState(EnemyState state)
+    private void OnDisable()
     {
-        switch (_enemyState)
+        Destroy(gameObject);
+    }
+
+    public void ChangeState(EnemyState state)
+    {
+        switch (State)
         {
             case EnemyState.Idle:
                 _idleState.EndState();
@@ -153,13 +206,20 @@ public class EnemyController : MonoBehaviour
             case EnemyState.GetDamage:
                 _getDamageState.EndState();
                 break;
+            case EnemyState.Down:
+                _downState.EndState();
+                break;
+            case EnemyState.Dead:
+                _deadState.EndState();
+                break;
+            
             default:
                 break;
         }
 
-        _enemyState = state;
+        State = state;
 
-        switch (_enemyState)
+        switch (State)
         {
             case EnemyState.Idle:
                 _idleState.StartState();
@@ -173,6 +233,13 @@ public class EnemyController : MonoBehaviour
             case EnemyState.GetDamage:
                 _getDamageState.StartState();
                 break;
+            case EnemyState.Down:
+                _downState.StartState();
+                break;
+            case EnemyState.Dead:
+                _deadState.StartState();
+                break;
+            
             default:
                 break;
         }
@@ -183,7 +250,7 @@ public class EnemyController : MonoBehaviour
         switch (_battleState)
         {
             case BattleState.Idle:
-                _animator.SetBool("Idle", false);
+                Animator.SetBool("Idle", false);
                 break;
             case BattleState.Battle:
                 break;
@@ -196,10 +263,10 @@ public class EnemyController : MonoBehaviour
         switch (_battleState)
         {
             case BattleState.Idle:
-                _animator.SetBool("Idle", true);
+                Animator.SetBool("Idle", true);
                 break;
             case BattleState.Battle:
-                _animator.SetTrigger("Buff");
+                Animator.SetTrigger("Buff");
                 break;
             default:
                 break;
@@ -208,19 +275,13 @@ public class EnemyController : MonoBehaviour
 
     private void ChangeStateToMove()
     {
-        _animator.SetTrigger("Buff End");
+        Animator.SetTrigger("Buff End");
         ChangeState(EnemyState.Move);
     }
     
-    public void GetDamage(float value)
+    public void GetDamage()
     {
         ChangeState(EnemyState.GetDamage);
-        gameObject.SendMessage("AddDownGauge", value, SendMessageOptions.DontRequireReceiver);
-    }
-    
-    private void BackToIdle()
-    {
-        ChangeState(EnemyState.Idle);
     }
     
     private void OnTriggerEnterInDetectingCollider(Collider other)
@@ -233,11 +294,11 @@ public class EnemyController : MonoBehaviour
             
             transform.LookAt(playerPos);
             
-            _moveState.SetFindPlayer(true);
+            _moveState.IsPlayerFound = true;
             
             ChangeState(EnemyState.Idle);
             ChangeState(BattleState.Battle);
-            Invoke(nameof(ChangeStateToMove), Random.Range(1, 5));
+            Invoke(nameof(ChangeStateToMove), Animator.GetCurrentAnimatorStateInfo(0).length);
 
             _detectCol.radius = 15f;
         }
@@ -247,11 +308,13 @@ public class EnemyController : MonoBehaviour
     {
         if (other.CompareTag("Player") && _battleState == BattleState.Battle)
         {
-            _moveState.SetFindPlayer(false);
+            _moveState.IsPlayerFound = false;
             ChangeState(BattleState.Idle);
             ChangeState(EnemyState.Idle);
 
             _detectCol.radius = 7f;
         }
     }
+
+    public void Attack() => _attackState.Attack();
 }

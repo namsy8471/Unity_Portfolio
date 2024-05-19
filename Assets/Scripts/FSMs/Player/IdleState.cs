@@ -7,30 +7,32 @@ using UnityEngine.EventSystems;
 public class IdleState : IStateBase
 {
     // FSM 상태 관련
-    enum EInputType
+    enum InputType
     {
         Nothing,
         KeyBoard,
         Mouse
     }
 
-    private EInputType InputType;
-    
-    private float _moveHorizontal;
-    private float _moveVertical;
+    private InputType _inputType;
 
-    private PlayerController _player;
+    private PlayerController _controller;
 
     private Rigidbody _rb;
     
     private TargetingSystem _targetingSystem;
     private Animator _animator;
-    
-    public Vector3 DestPos { get; private set; }
+
+    public float MoveHorizontal { get; set; }
+    public float MoveVertical { get; set; }
+
+    public bool CanMove { get; set; } = true;
+    public bool FixedToWalk { get; set; } = false;
+    public Vector3 DestPos { get; set; }
 
     public void Init()
     {
-        _player = Managers.Game.Player.GetComponent<PlayerController>();
+        _controller = Managers.Game.Player.GetComponent<PlayerController>();
         
         #region KeyBinding
         
@@ -45,19 +47,19 @@ public class IdleState : IStateBase
         Managers.Input.LMBPressed += MouseInputCheck;
         Managers.Input.LMBPressed += GetMousePos;
         
-        _player.PlayerMousePressedActions.Add(MouseInputCheck);
-        _player.PlayerMousePressedActions.Add(GetMousePos);
+        _controller.PlayerMousePressedActions.Add(MouseInputCheck);
+        _controller.PlayerMousePressedActions.Add(GetMousePos);
         #endregion
         
-        _animator = _player.GetComponentInChildren<Animator>();
-        _rb = _player.GetComponent<Rigidbody>();
+        _animator = _controller.GetComponentInChildren<Animator>();
+        _rb = _controller.GetComponent<Rigidbody>();
         _targetingSystem = Managers.Game.TargetingSystem;
-        _player.Status.MoveSpeed = 400f;
+        _controller.Status.MoveSpeed = 400f;
     }
     
     public void StartState()
     {
-        InputType = EInputType.Nothing;
+        _inputType = InputType.Nothing;
         
         _animator.SetBool("isRun", false);
         
@@ -65,71 +67,77 @@ public class IdleState : IStateBase
 
     public void UpdateState()
     {
+        if (!CanMove) return;
+        Debug.DrawRay(Managers.Game.Player.transform.position + Vector3.up, Managers.Game.Player.transform.forward, Color.red,
+            2.0f);
         Move();
     }
 
     public void EndState()
     {
-        _rb.velocity = Vector3.zero;
-        _animator.SetBool("isWalk", false);
-        _animator.SetBool("isRun", false);
+        ChangeToStop();
     }
     
     private void KeyboardInputCheck()
     {
-        _moveHorizontal = Input.GetAxisRaw("Horizontal");
-        _moveVertical = Input.GetAxisRaw("Vertical");
+        MoveHorizontal = Input.GetAxisRaw("Horizontal");
+        MoveVertical = Input.GetAxisRaw("Vertical");
         
-        InputType = EInputType.KeyBoard;
+        _inputType = InputType.KeyBoard;
     }
     
     private void MouseInputCheck()
     {
         if (EventSystem.current.IsPointerOverGameObject()) return;
         
-        InputType = EInputType.Mouse;
+        _inputType = InputType.Mouse;
     }
 
-    private void ChangeToWalk()
+    public void ChangeToStop()
     {
-        if (_rb.velocity.magnitude < 0.2f)
+        _rb.velocity = Vector3.zero;
+        _animator.SetBool("isWalk", false);
+        _animator.SetBool("isRun", false);
+        _animator.SetBool("isMove", false);
+        _controller.Status.MoveSpeed = 400f;
+    }
+    
+    public void ChangeToWalk()
+    {
+        if (!_animator.GetBool("isMove"))
         {
-            _animator.SetBool("isRun", false);
-            _animator.SetBool("isWalk", false);
-            _player.GetComponent<Status>().MoveSpeed = 400f;
+            ChangeToStop();
         }
         else
         {
             _animator.SetBool("isRun", false);
             _animator.SetBool("isWalk", true);
-            _player.GetComponent<Status>().MoveSpeed = 200f;
+            _controller.Status.MoveSpeed = 200f;
         }
     }
 
-    private void ChangeToRun()
+    public void ChangeToRun()
     {
-        if (_rb.velocity.magnitude < 0.2f)
+        if (!_animator.GetBool("isMove"))
         {
-            _animator.SetBool("isRun", false);
-            _animator.SetBool("isWalk", false);
-            _player.Status.MoveSpeed = 400f;
+            ChangeToStop();
         }
         else
         {
             _animator.SetBool("isWalk", false);
             _animator.SetBool("isRun", true);
-            _player.Status.MoveSpeed = 400f;
+            _controller.Status.MoveSpeed = 400f;
         }
     }
 
     private void Move()
     {
-        switch (InputType)
+        switch (_inputType)
         {
-            case EInputType.Nothing:
+            case InputType.Nothing:
                 break;
-            case EInputType.KeyBoard:
-                if (_moveVertical == 0 && _moveHorizontal == 0)
+            case InputType.KeyBoard:
+                if (MoveVertical == 0 && MoveHorizontal == 0)
                 {
                     ChangeToInputTypeNothing();
                     break;
@@ -137,7 +145,7 @@ public class IdleState : IStateBase
                 
                 MoveByKeyboard();
                 break;
-            case EInputType.Mouse:
+            case InputType.Mouse:
 
                 if (CheckRange())
                 {
@@ -148,46 +156,44 @@ public class IdleState : IStateBase
                 MoveByMouse();
                 break;
         }
+        
+        if(FixedToWalk) ChangeToWalk();
     }
 
     private bool CheckRange()
     {
-        if (_targetingSystem.Target != null)
-        {
-            if (Vector3.Distance(_player.transform.position, DestPos)
-                <= _player.Status.AtkRange - 0.2f)
-                return true;
-        }
-        else
-        {
-            if (Vector3.Distance(_player.transform.position, DestPos) <= 0.2f)
-                return true;
-        }
+        if (Vector3.Distance(_controller.transform.position, DestPos) <= 0.2f)
+            return true;
         
         return false;
     }
     
-    private void ChangeToInputTypeNothing()
+    public void ChangeToInputTypeNothing()
     {
-        InputType = EInputType.Nothing;
+        _inputType = InputType.Nothing;
         _rb.velocity = Vector3.zero;
+        
         _animator.SetBool("isRun", false);
+        _animator.SetBool("isMove", false);
     }
 
     private void MoveByKeyboard()
     {
         _animator.SetBool("isRun", true);
-
+        _animator.SetBool("isMove", true);
+        
         var camTransform = Camera.main.transform;
-        var movement = camTransform.forward * _moveVertical + camTransform.right * _moveHorizontal;
+        var movement = camTransform.forward * MoveVertical + camTransform.right * MoveHorizontal;
         movement.y = 0f;
 
         var camForward = Quaternion.LookRotation(movement);
-        _player.transform.rotation = camForward;
-        _rb.velocity = movement.normalized * (_player.Status.MoveSpeed * Time.deltaTime);
+        _controller.transform.rotation = camForward;
+        _rb.velocity = movement.normalized * (_controller.Status.MoveSpeed * Time.deltaTime);
         
-        _moveHorizontal = 0;
-        _moveVertical = 0;
+        MoveHorizontal = 0;
+        MoveVertical = 0;
+        
+        CheckWall();
     }
 
     private void GetMousePos()
@@ -213,16 +219,26 @@ public class IdleState : IStateBase
     private void MoveByMouse()
     {
         _animator.SetBool("isRun", true);
-
-        var position = _player.transform.position;
+        _animator.SetBool("isMove", true);
+        
+        var position = _controller.transform.position;
         var newPos = new Vector3(DestPos.x, position.y, DestPos.z);
         DestPos = newPos;
         
         Vector3 moveDirection = (DestPos - position).normalized;
-        _rb.velocity = moveDirection * (_player.Status.MoveSpeed * Time.deltaTime);
+        _rb.velocity = moveDirection * (_controller.Status.MoveSpeed * Time.deltaTime);
 
         Vector3 lookAtTarget = new Vector3(DestPos.x, position.y, DestPos.z);
-        _player.transform.LookAt(lookAtTarget);
+        _controller.transform.LookAt(lookAtTarget);
+
+        CheckWall();
     }
-    
+
+    private void CheckWall()
+    {
+        if (Physics.Raycast(Managers.Game.Player.transform.position + Vector3.up * 0.3f,
+                Managers.Game.Player.transform.forward,
+                1.0f, LayerMask.GetMask("Building")))
+            ChangeToStop();
+    }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ItemDataArmor : ItemDataEquipment
 {
-    [SerializeField] protected float def;
+    [SerializeField] protected int def;
 
-    public float Def => def;
+    public int Def => def;
 }

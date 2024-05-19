@@ -12,7 +12,14 @@ public class UI_SkillBox : UI_Base
 
     private void Start()
     {
+        _skill = null;
         _skillIcon = transform.GetChild(0).GetComponentInChildren<Image>();
+
+        var str = name;
+        Debug.Log(str);
+        
+        var num = int.Parse(str.Replace("SkillBox", ""));
+        Managers.Input.AddAction(Managers.Input.KeyButtonDown, (KeyCode.F1 + num - 1), CastSkill);
     }
 
     private void SetSkillBox(Skill skill)
@@ -45,22 +52,24 @@ public class UI_SkillBox : UI_Base
                 if (_skill == null)
                 {
                     var newSkill = Managers.Game.SkillSystem.CurrentSelectSkill;
-                    
                     SetSkillBox(newSkill);
-                    
-                    Managers.Game.SkillSystem.DragSkillIcon.SetActive(false);
-                    Managers.Game.SkillSystem.CurrentSelectSkill = null;
+                    Managers.Game.SkillSystem.StopDragSkill();
                 }
                 else
                 {
-                    if (_skill is not ActiveSkill isActiveSkill) return;
-
-                    isActiveSkill.CastSkill();
+                    CastSkill();
                 }
 
                 break;
             }
         }
+    }
+
+    private void CastSkill()
+    {
+        if (_skill is not ActiveSkill activeSkill) return;
+
+        activeSkill.CastSkill();
     }
 
     public override void OnPointerUp(PointerEventData eventData)

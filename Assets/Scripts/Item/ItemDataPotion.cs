@@ -14,7 +14,8 @@ public class ItemDataPotion : ItemData
 
     public override void UseItem()
     {
-        Debug.Log("HP 회복!");
+        Debug.Log("HP 50 증가!");
+        Managers.Game.Player.GetComponent<PlayerController>().Status.MaxHp += 50;
         InventoryController.DeleteItemInHighlight();
     }
 

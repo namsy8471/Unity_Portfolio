@@ -23,14 +23,16 @@ public class ShieldSlot : EquipmentSlot
     {
         base.EquipItem(isSwitching);
         
-        Managers.Game.Player.GetComponent<Status>().Def += 
-            (CurrentEquipmentItem.ItemData as ItemDataArmor).Def;
+        var status = Managers.Game.Player.GetComponent<PlayerController>().Status;
+        
+        status.Def += (CurrentEquipmentItem.ItemData as ItemDataArmor).Def;
     }
 
     protected override void UnequipItem(bool isSwitching)
     {
-        Managers.Game.Player.GetComponent<Status>().Def -= 
-            (CurrentEquipmentItem.ItemData as ItemDataArmor).Def;
+        var status = Managers.Game.Player.GetComponent<PlayerController>().Status;
+
+        status.Def -= (CurrentEquipmentItem.ItemData as ItemDataArmor).Def;
         
         base.UnequipItem(isSwitching);
     }

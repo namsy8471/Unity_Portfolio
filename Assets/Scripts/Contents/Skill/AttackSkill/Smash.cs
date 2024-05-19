@@ -5,12 +5,15 @@ using UnityEngine;
 
 public class Smash : AttackSkill
 {
+    private int _maxAtkCountOrigin;
+    
     public Smash()
     {
         Damage = 0;
         DamageRatio = 4.5f;
         CoolTime = 5.0f;
         Range = 2.5f;
+        DownGauge = 101f;
         
         BonusStatus = new Status
         {
@@ -25,6 +28,8 @@ public class Smash : AttackSkill
         
         SkillCastAnimClip = null;
         SkillUseAnimClip = Resources.Load<AnimationClip>("Animation/Player/Skill/Smash/Smash");
+        
+        Managers.Game.Player.GetComponent<PlayerController>().Status += BonusStatus;
     }
     
     public override void CastSkill()

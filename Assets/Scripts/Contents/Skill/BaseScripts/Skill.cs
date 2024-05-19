@@ -6,8 +6,7 @@ using UnityEngine.EventSystems;
 
 public class Skill
 {
-    public Skill() { }
-    public Skill(Skill orginal) { }
+    protected Skill() { }
 
     public enum Rank
     {

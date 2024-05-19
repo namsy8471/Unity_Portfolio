@@ -28,7 +28,6 @@ public class GameManager
 
     public void Update()
     {
-        _targetingSystem.Update();
         _inventoryController.Update();
         _sKillSystem.Update();
     }

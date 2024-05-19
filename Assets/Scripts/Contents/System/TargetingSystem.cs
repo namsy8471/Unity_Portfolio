@@ -21,40 +21,35 @@ public class TargetingSystem
         Managers.Input.AddAction(Managers.Input.KeyButtonPressed, Managers.Input.TargetingKey, TargetEnemy);
         Managers.Input.AddAction(Managers.Input.KeyButtonUp, Managers.Input.TargetingKey, ClearTarget);
     }
-
-    public void Update()
-    {
-        
-    }
     
     private void FindEnemy()
     {
         _setClosestEnemyCollider?.Invoke();
+        if(Target == null) return;
+        
         isTargetingWorkNow = true;
     }
 
     private void TargetEnemy()
     {
+        if(Target == null) return;
+            
         _drawCircleOnEnemy?.Invoke(Target.transform.position);
         _drawLineToEnemy?.Invoke();
     }
     
-    private void ClearTarget()
+    public void ClearTarget()
     {
-        Target = null;
-
+        if (Target == null) return;
+        
         isTargetingWorkNow = false;
         _clearTargetingLineRenderer?.Invoke();
         _clearTargetingCircle?.Invoke();
+        
+        Target = null;
     }
     
     public bool IsCurrentTargetExist()
-    {
-        return Target;
-    }
-    
-    
-    public GameObject GetCurrentTarget()
     {
         return Target;
     }

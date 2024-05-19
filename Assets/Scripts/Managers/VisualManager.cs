@@ -19,10 +19,10 @@ public class VisualManager
     private readonly float _circleSize = 50f;
     private float _rotationOffset = 0;
 
-    private GameObject _skillBubbleIcon;
-
+    private GameObject _skillBubble;
+    
     public GameObject ImageCanvas => _imageCanvas;
-    public Image SkillIconInBubble { get; private set; }
+    private Image SkillIconInBubble { get; set; }
 
     public void Init()
     {
@@ -53,7 +53,7 @@ public class VisualManager
 
     public void Update()
     {
-        if(_skillBubbleIcon.activeSelf == true)
+        if(_skillBubble.activeSelf)
             UpdateSkillFloatingIcon();
     }
     
@@ -80,17 +80,20 @@ public class VisualManager
 
     private void SkillFloatingIconInit()
     {
-        _skillBubbleIcon = GameObject.Instantiate(Resources.Load<GameObject>
+        _skillBubble = GameObject.Instantiate(Resources.Load<GameObject>
                 ("Prefabs/UI/UI_SkillFloatingIcon/UI_SkillFloatingIcon"),
             _skillBubbleCanvas.transform);
         
-        SkillIconInBubble = _skillBubbleIcon.transform.GetChild(0).GetComponent<Image>();
-        _skillBubbleIcon.SetActive(false);
+        SkillIconInBubble = _skillBubble.transform.GetChild(0).GetComponent<Image>();
+        _skillBubble.SetActive(false);
     }
 
     private void DrawCircleOnEnemy(Vector3 currentTargetPos)
     {
         if (Managers.Game.TargetingSystem.Target == null) return;
+        
+        Managers.Game.TargetingSystem.Target.GetComponent<EnemyController>()?.HpBar.SetActive(true);
+        
         _circleImage.gameObject.SetActive(true);
         Vector3 screenPos = Camera.main.WorldToScreenPoint(currentTargetPos);
 
@@ -116,18 +119,19 @@ public class VisualManager
 
     public void DrawSkillFloatingIcon<T>(T skill) where T : ActiveSkill
     {
-        _skillBubbleIcon.SetActive(true);
-        _skillBubbleIcon.GetComponent<UI_SkillFloatingIcon>().Skill = skill;
+        _skillBubble.SetActive(true);
+        _skillBubble.GetComponent<UI_SkillFloatingIcon>().Skill = skill;
         SkillIconInBubble.sprite = skill.SkillIcon;
     }
 
     private void UpdateSkillFloatingIcon()
     {
-        _skillBubbleIcon.transform.LookAt(Camera.main.transform);
+        _skillBubble.transform.LookAt(Camera.main.transform);
     }
-
+    
     private void ClearTargetingCircle()
     {
+        Managers.Game.TargetingSystem.Target.GetComponent<EnemyController>()?.HpBar.SetActive(false);
         _circleImage.SetActive(false);
     }
 
@@ -139,7 +143,7 @@ public class VisualManager
     public void ClearSkillFloatingIcon()
     {
         SkillIconInBubble.sprite = null;
-        _skillBubbleIcon.GetComponent<UI_SkillFloatingIcon>().Skill = null;
-        _skillBubbleIcon.SetActive(false);
+        _skillBubble.GetComponent<UI_SkillFloatingIcon>().Skill = null;
+        _skillBubble.SetActive(false);
     }
 }

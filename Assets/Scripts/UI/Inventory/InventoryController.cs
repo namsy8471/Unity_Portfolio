@@ -112,7 +112,8 @@ public class InventoryController
             if (_itemToLoot == Managers.Ray.RayHitCollider.transform.gameObject && Vector3.Distance(Managers.Ray.RayHitPoint, Managers.Game.Player.transform.position) < 2.0f)
             {
                 LootingItem(Managers.Ray.RayHitCollider.transform.name);
-                Object.Destroy(Managers.Ray.RayHitCollider.transform.gameObject);
+                Managers.Ray.RayHitCollider.transform.gameObject.SetActive(false);
+                // Object.Destroy(Managers.Ray.RayHitCollider.transform.gameObject);
             }
         }
     }

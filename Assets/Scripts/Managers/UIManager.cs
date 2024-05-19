@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using Contents.Status;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.UIElements.Experimental;
 
 public class UIManager
 {
@@ -14,6 +16,8 @@ public class UIManager
     private Canvas _uiBackground;
     private Canvas _statusUI;
     private Canvas _skillUI;
+    private Canvas _dieUI;
+    private List<Canvas> _canvasList = new List<Canvas>();
     
     private Slider _hpBar;
     private Slider _mpBar;
@@ -37,23 +41,21 @@ public class UIManager
     public Slider MpBarInStatusWindow => _mpBarInStatusWindow;
     public Slider StaminaBarInStatusWindow => _staminaBarInStatusWindow;
 
+    public TextMeshProUGUI Str { get; set; }
+    public TextMeshProUGUI Int { get; set; }
+    public TextMeshProUGUI Dex { get; set; }
+    public TextMeshProUGUI Will { get; set; }
+    public TextMeshProUGUI Luck { get; set; }
+    public TextMeshProUGUI Damage { get; set; }
+    public TextMeshProUGUI Def { get; set; }
+
     public Inventory_Main MainInventory => _mainInventory;
     public List<Inventory_Base> InventoryList => _inventories;
 
     public void Init()
     {
-        _inventoryUI = GameObject.Instantiate(Resources.Load<GameObject>
-                ("Prefabs/UI/Inventory/UI_MainInventory")).GetComponent<Canvas>();
+        CanvasInit();
 
-        _statusUI = GameObject.Instantiate(Resources.Load<GameObject>
-            ("Prefabs/UI/UI_StatusWindow/StatusWindowCanvas").GetComponent<Canvas>());
-
-        _skillUI = GameObject.Instantiate(Resources.Load<GameObject>
-            ("Prefabs/UI/UI_SkillWindow/SkillWindowCanvas").GetComponent<Canvas>());
-        
-        _uiBackground = GameObject.Instantiate(Resources.Load<GameObject>
-            ("Prefabs/UI/UI_Background/UI_Background")).GetComponent<Canvas>();
-        
         _mainInventory = _inventoryUI.GetComponentInChildren<Inventory_Main>();
         _mainInventory.Init();
         
@@ -64,6 +66,8 @@ public class UIManager
         _hpBarInStatusWindow = _statusUI.transform.Find("StatusWindow/WindowHandle/UI_Background/HPBar").GetComponent<Slider>();
         _mpBarInStatusWindow = _statusUI.transform.Find("StatusWindow/WindowHandle/UI_Background/MPBar").GetComponent<Slider>();
         _staminaBarInStatusWindow = _statusUI.transform.Find("StatusWindow/WindowHandle/UI_Background/StaminaBar").GetComponent<Slider>();
+        
+        InitializeText();
         
         _inventories.Add(_mainInventory);
         
@@ -87,6 +91,46 @@ public class UIManager
         _statusUI.gameObject.SetActive(false);
         _skillUI.gameObject.SetActive(false);
     }
+
+    private void CanvasInit()
+    {
+        _inventoryUI = GameObject.Instantiate(Resources.Load<GameObject>
+            ("Prefabs/UI/Inventory/UI_MainInventory")).GetComponent<Canvas>();
+        _canvasList.Add(_inventoryUI);
+        
+        _statusUI = GameObject.Instantiate(Resources.Load<GameObject>
+            ("Prefabs/UI/UI_StatusWindow/StatusWindowCanvas").GetComponent<Canvas>());
+        _canvasList.Add(_statusUI);
+
+        _skillUI = GameObject.Instantiate(Resources.Load<GameObject>
+            ("Prefabs/UI/UI_SkillWindow/SkillWindowCanvas").GetComponent<Canvas>());
+        _canvasList.Add(_skillUI);
+
+        _uiBackground = GameObject.Instantiate(Resources.Load<GameObject>
+            ("Prefabs/UI/UI_Background/UI_Background")).GetComponent<Canvas>();
+        _canvasList.Add(_uiBackground);
+
+        _dieUI = GameObject.Instantiate(Resources.Load<GameObject>
+            ("Prefabs/UI/UI_Dead/DieUI").GetComponent<Canvas>());
+        _dieUI.gameObject.SetActive(false);
+        
+        _dieUI.gameObject.GetComponentInChildren<Button>().onClick.AddListener(ResetGame);
+    }
+
+    public void DieCanvasActive()
+    {
+        foreach (var var in _canvasList)
+        {
+            var.gameObject.SetActive(false);
+        }
+        
+        _dieUI.gameObject.SetActive(true);
+    }
+
+    private void ResetGame()
+    {
+        SceneManager.LoadScene("GameScene");
+    }
     
     private void CloseOrOpenInventory()
     {
@@ -104,11 +148,17 @@ public class UIManager
     private void CloseOrOpenStatusWindow()
     {
         _statusUI.gameObject.SetActive(!_statusUI.gameObject.activeSelf);
+        
+        Managers.Input.RemovePlayerMouseActions();
+        Managers.Input.RollbackPlayerMouseActions();
     }
 
     private void CloseOrOpenSkillWindow()
     {
         _skillUI.gameObject.SetActive(!_skillUI.gameObject.activeSelf);
+        
+        Managers.Input.RemovePlayerMouseActions();
+        Managers.Input.RollbackPlayerMouseActions();
     }
 
     private void InitializeSlider(Slider slider, float maxValue)
@@ -119,6 +169,18 @@ public class UIManager
 
         var text = slider.gameObject.GetComponentInChildren<TextMeshProUGUI>();
         text.text = slider.value + "/" + slider.maxValue;
+    }
+
+    private void InitializeText()
+    {
+        Str = _statusUI.transform.Find("StatusWindow/WindowHandle/UI_Background/StrText/Str").GetComponent<TextMeshProUGUI>();
+        Int = _statusUI.transform.Find("StatusWindow/WindowHandle/UI_Background/IntText/Int").GetComponent<TextMeshProUGUI>();
+        Dex = _statusUI.transform.Find("StatusWindow/WindowHandle/UI_Background/DexText/Dex").GetComponent<TextMeshProUGUI>();
+        Will = _statusUI.transform.Find("StatusWindow/WindowHandle/UI_Background/WillText/Will").GetComponent<TextMeshProUGUI>();
+        Luck = _statusUI.transform.Find("StatusWindow/WindowHandle/UI_Background/LuckText/Luck").GetComponent<TextMeshProUGUI>();
+
+        Damage = _statusUI.transform.Find("StatusWindow/WindowHandle/UI_Background/DamageText/Damage").GetComponent<TextMeshProUGUI>();
+        Def = _statusUI.transform.Find("StatusWindow/WindowHandle/UI_Background/DefText/Def").GetComponent<TextMeshProUGUI>();
     }
     
     public void BindingSliderWithPlayerStatus()
@@ -131,12 +193,31 @@ public class UIManager
         InitializeSlider(_mpBarInStatusWindow, Managers.Game.Player.GetComponent<PlayerController>().Status.MaxMp);
         InitializeSlider(_staminaBarInStatusWindow, Managers.Game.Player.GetComponent<PlayerController>().Status.MaxStamina);
     }
-
+    
     public void ChangeSliderValue(Slider slider, float value)
     {
         slider.value = value;
 
         var text = slider.gameObject.GetComponentInChildren<TextMeshProUGUI>();
         text.text = Mathf.Floor(slider.value) + "/" + slider.maxValue;
+    }
+    
+    public void ChangeSliderMaxValue(Slider slider, float maxValue)
+    {
+        slider.maxValue = maxValue;
+        slider.value = maxValue;
+
+        var text = slider.gameObject.GetComponentInChildren<TextMeshProUGUI>();
+        text.text = Mathf.Floor(slider.value) + "/" + slider.maxValue;
+    }
+
+    public void ChangeText(TextMeshProUGUI text, int value)
+    {
+        text.text = value.ToString();
+    }
+    
+    public void ChangeTextForDamage(TextMeshProUGUI text, int minValue, int maxvalue)
+    {
+        text.text = minValue + " ~ " + maxvalue;
     }
 }

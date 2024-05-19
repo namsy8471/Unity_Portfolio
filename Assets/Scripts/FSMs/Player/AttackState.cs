@@ -8,24 +8,19 @@ using Random = UnityEngine.Random;
 
 public class AttackState : IStateBase
 {
-    
-     /*
-     * 내가 필요한 거
-     * 사거리? => 플레이어 스탯에서 들고오면 됨
-     * 어택 쿨다운? => 플레이어 스탯에서 공속을 만들자!
-     * 대미지 => 플레이어 스탯에서!
-     * 최대 공격횟수 => 플레이어스탯
-     */
-    
+
+    private PlayerController _controller;
     private Animator _animator;
-    
+
+    public AttackSkill Skill { get; set;}
     public float LastAttackCooldown { get; private set; }
     public float AttackTimer { get; private set; }
     public float AttackCount { get; private set; }
-    
+
     public void Init()
     {
-        _animator = Managers.Game.Player.GetComponentInChildren<Animator>();
+        _controller = Managers.Game.Player.GetComponent<PlayerController>();
+        _animator = _controller.GetComponent<Animator>();
         
         LastAttackCooldown = 2.0f;
         AttackTimer = 0;
@@ -34,28 +29,25 @@ public class AttackState : IStateBase
 
     public void StartState()
     {
-        AttackTimer = 0;
-
         Debug.Log("Attack State Start");
 
-        var player = Managers.Game.Player.GetComponent<PlayerController>();
-
-        player.IsAttackReserved = false;
+        _controller.IsAttackReserved = false;
         
-        var playerSkill = player.CurrentSkill;
-        if (playerSkill != null)
+        Skill = _controller.CurrentSkill as AttackSkill;
+        if (Skill != null)
         {
-            player.SetRootAnimFalseInvoke();
-            playerSkill.UseSkill();
+            AttackTimer = Skill.SkillUseAnimClip.length;
+            Skill.UseSkill();
         }
         
         else
         {
-            if (player.Status.Stamina < 3f) return;
-            player.Status.Stamina -= 3f;
+            AttackTimer = _controller.Status.AtkSpeed;
+            if (_controller.Status.Stamina < 3f) return;
+            _controller.Status.Stamina -= 3f;
             AttackCount++;
 
-            switch (player.Status.AtkStyle)
+            switch (_controller.Status.AtkStyle)
             {
                 case ItemDataWeapon.AttackStyle.Punch:
                     _animator.Play("HandAtk" + Random.Range(1, 4));
@@ -75,79 +67,26 @@ public class AttackState : IStateBase
 
     public void UpdateState()
     {
-        Debug.Log("Attack State Update");
-
-        AttackTimer += Time.deltaTime;
-
-        // _attackTimer += Time.deltaTime;
-        //
-        // if(_attackTimer >= 2)
-        //     ChangeState(AtkState.AtkFinish);
-        //
-        // switch (_atkState)
-        // {
-        //     case AtkState.Idle:
-        //         
-        //         if (Input.GetMouseButtonDown(0) && !Managers.Game.TargetingSystem.GetCurrentTarget().GetComponent<EnemyGetDamageState>().IsInvincible())
-        //         {
-        //             ChangeState(AtkState.Atk1);
-        //             break;
-        //         }
-        //         
-        //         break;
-        //     
-        //     case AtkState.Atk1:
-        //         if (Input.GetMouseButtonDown(0) && _attackTimer >= Managers.Game.Player.GetComponent<Stat>().AtkSpeed)
-        //         {
-        //             ChangeState(AtkState.Atk2);
-        //             break;
-        //         }
-        //         
-        //         break;
-        //     
-        //     case AtkState.Atk2:
-        //         if (Input.GetMouseButtonDown(0) && _attackTimer >= Managers.Game.Player.GetComponent<Stat>().AtkSpeed)
-        //         {
-        //             ChangeState(AtkState.Atk3);
-        //             break;
-        //         }
-        //         break;
-        //     
-        //     case AtkState.Atk3:
-        //         if (_attackTimer >= _lastAttackCooldown)
-        //         {
-        //             ChangeState(AtkState.AtkFinish);
-        //             break;
-        //         }
-        //         break;
-        //     case AtkState.AtkFinish:
-        //         
-        //         break;
-        // }
+        AttackTimer -= Time.deltaTime;
     }
 
     public void EndState()
     {
-        Debug.Log("Attack State End!");
-        //Managers.Game.TargetingSystem.Target = null;
-        // _atkState = AtkState.Idle;
+        
     }
     
-    public void Attack()
+    public void Attack(EnemyController enemyController)
     {
-        var player = Managers.Game.Player;
-        var targetSys = Managers.Game.TargetingSystem;
+        var targetPos = enemyController.transform.position;
+        targetPos.y = _controller.transform.position.y;
         
-        var targetPos = targetSys.IsCurrentTargetExist() ?
-            targetSys.GetCurrentTarget().transform.position :
-            player.GetComponent<PlayerController>().IdleState.DestPos;
+        _controller.transform.LookAt(targetPos);
+        AttackTimer = _animator.GetCurrentAnimatorStateInfo(0).length + 0.4f;
         
-        targetPos.y = player.transform.position.y;
+        enemyController.GetDamage();
+
+        _controller.CurrentEnemy = null;
         
-        player.transform.LookAt(targetPos);
-        
-        // Managers.Game.TargetingSystem.GetCurrentTarget().GetComponent<EnemyController>().
-        //     GetDamage(player.GetComponent<PlayerController>().Status.DownGaugeToHit);
+        Debug.Log("애니메이션 클립 시간 : " + AttackTimer);
     }
-    
 }

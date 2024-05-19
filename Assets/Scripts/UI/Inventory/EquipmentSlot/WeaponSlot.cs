@@ -22,36 +22,31 @@ public class WeaponSlot : EquipmentSlot
     protected override void EquipItem(bool isSwitching)
     {
         base.EquipItem(isSwitching);
+
+        var status = Managers.Game.Player.GetComponent<PlayerController>().Status;
         
-        (Managers.Game.Player.GetComponent<Status>() as PlayerStatus).AtkStyle =
-            (CurrentEquipmentItem.ItemData as ItemDataWeapon).AtkStyle;
+        status.AtkStyle = (CurrentEquipmentItem.ItemData as ItemDataWeapon).AtkStyle;
         
-        Managers.Game.Player.GetComponent<Status>().MinDmg = 
-            (CurrentEquipmentItem.ItemData as ItemDataWeapon).MinAtk;
+        status.MinDmg = (CurrentEquipmentItem.ItemData as ItemDataWeapon).MinAtk;
+        status.MaxDmg = (CurrentEquipmentItem.ItemData as ItemDataWeapon).MaxAtk;
         
-        Managers.Game.Player.GetComponent<Status>().MaxDmg = 
-            (CurrentEquipmentItem.ItemData as ItemDataWeapon).MaxAtk;
-        
-        Managers.Game.Player.GetComponent<Status>().AtkRange = 
-            (CurrentEquipmentItem.ItemData as ItemDataWeapon).AtkRange;
-        
-        Managers.Game.Player.GetComponent<Status>().AtkSpeed = 
-            (CurrentEquipmentItem.ItemData as ItemDataWeapon).AtkSpeed;
-        
-        Managers.Game.Player.GetComponent<Status>().MaxAtkCount = 
-            (CurrentEquipmentItem.ItemData as ItemDataWeapon).MaxAtkCount;
+        status.AtkRange = (CurrentEquipmentItem.ItemData as ItemDataWeapon).AtkRange;
+        status.AtkSpeed = (CurrentEquipmentItem.ItemData as ItemDataWeapon).AtkSpeed;
+        status.MaxAtkCount = (CurrentEquipmentItem.ItemData as ItemDataWeapon).MaxAtkCount;
     }
 
     protected override void UnequipItem(bool isSwitching)
     {
-        (Managers.Game.Player.GetComponent<Status>() as PlayerStatus).AtkStyle = ItemDataWeapon.AttackStyle.Punch;
+        var status = Managers.Game.Player.GetComponent<PlayerController>().Status;
 
-        Managers.Game.Player.GetComponent<Status>().MinDmg = 5f;
-        Managers.Game.Player.GetComponent<Status>().MaxDmg = 10f;
+        status.AtkStyle = ItemDataWeapon.AttackStyle.Punch;
+
+        status.MinDmg = 5;
+        status.MaxDmg = 10;
         
-        Managers.Game.Player.GetComponent<Status>().AtkRange = 2.5f;
-        Managers.Game.Player.GetComponent<Status>().AtkSpeed = 0.7f;
-        Managers.Game.Player.GetComponent<Status>().MaxAtkCount = 3;
+        status.AtkRange = 2.5f;
+        status.AtkSpeed = 0.7f;
+        status.MaxAtkCount = 3;
         
         base.UnequipItem(isSwitching);
     }

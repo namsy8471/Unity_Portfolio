@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class RayManager
 {
@@ -12,78 +13,103 @@ public class RayManager
     private Collider _hitCollider;
     private Vector3 _hitPoint;
 
+    private GameObject _currentGo;
+    
     private LayerMask _layerMask;
     private const float SphereRadius = 50.0f; // 마우스 히트 포인트에서 타게팅이 가능한 범위
     
     public Collider RayHitCollider => _hitCollider;
     public Vector3 RayHitPoint => _hitPoint;
+
+    public Collider RayHitColliderByMouseClicked { get; set; }
+    public Vector3 RayHitPointByMouseClicked { get; set; }
+
     public void Init()
     {
-        Managers.Game.TargetingSystem.SetSetClosestEnemyCollider(setClosestEnemyCollider);
-        _layerMask = ~LayerMask.GetMask("Player");
+        Managers.Game.TargetingSystem.SetSetClosestEnemyCollider(SetClosestEnemyCollider);
+        _layerMask = ~LayerMask.GetMask("Player", "DetectingBoundary", "Building");
     }
 
     public void Update()
     {
-        castRay();
+        CastRay();
     }
 
-    private void castRay()
+    private void CastRay()
     {
         if (EventSystem.current.IsPointerOverGameObject()) return;
         if (Util.IsMousePointerOutOfScreen()) return;
         
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        
-        if (Physics.Raycast(ray, out hit, 100f, _layerMask))
-        {
-            checkingIsTriggerOnRecersive(hit, ray);
-        }
 
-    }
-
-    private void checkingIsTriggerOnRecersive(RaycastHit hit, Ray ray)
-    {
-        if (hit.collider.isTrigger)
+        if (Physics.Raycast(ray, out var hit, 100f, _layerMask))
         {
-            if (Physics.Raycast(hit.point, ray.direction, out hit, 100f))
+            SaveHitInfo(hit);
+            if (Input.GetMouseButton(0))
             {
-                checkingIsTriggerOnRecersive(hit, ray);
+                SaveHitInfoByMouse(hit);
+            }
+            
+            if (_hitCollider.gameObject.layer == LayerMask.NameToLayer("Enemy") ||
+                _hitCollider.gameObject.layer == LayerMask.NameToLayer("Player") ||
+                _hitCollider.gameObject == Managers.Game.TargetingSystem.Target)
+            {
+                if (_currentGo != _hitCollider.gameObject)
+                {
+                    _currentGo = _hitCollider.gameObject;
+                    _currentGo.GetComponent<Controller>().HpBar.SetActive(true);
+                }
+            }
+            else
+            {
+                _currentGo?.GetComponent<Controller>().HpBar.SetActive(false);
+                _currentGo = null;
             }
         }
-            
+
+        if (Physics.Raycast(ray, out var hit2, 100f, LayerMask.GetMask("Player")))
+        {
+            Managers.Game.Player.GetComponent<Controller>().HpBar.SetActive(true);
+        }
         else
         {
-            saveHitInfo(hit);
+            Managers.Game.Player.GetComponent<Controller>().HpBar.SetActive(false);
         }
+
     }
 
-    private void saveHitInfo(RaycastHit hit)
+    private void SaveHitInfo(RaycastHit hit)
     {
         _hitCollider = hit.collider;
         _hitPoint = hit.point;
     }
 
-    private void setClosestEnemyCollider()
+    private void SaveHitInfoByMouse(RaycastHit hit)
+    {
+        RayHitColliderByMouseClicked = hit.collider;
+        RayHitPointByMouseClicked = hit.point;
+    }
+
+    private void SetClosestEnemyCollider()
     {
         Collider[] colliders = Physics.OverlapSphere(_hitPoint, SphereRadius, 1 << LayerMask.NameToLayer("Enemy"));
+
+        if (colliders.Length < 1) return;
         
-            
-        if (colliders.Length > 0)
+        var closestDistance = Mathf.Infinity;
+        foreach (Collider collider in colliders)
         {
-            var closestDistance = Mathf.Infinity;
+            var distance = Vector3.Distance(_hitPoint, collider.transform.position);
 
-            foreach (Collider collider in colliders)
+            var enemyState = collider.GetComponent<EnemyController>().State;
+            if (enemyState == EnemyController.EnemyState.Dead) continue;
+            
+            if (distance < closestDistance)
             {
-                var distance = Vector3.Distance(_hitPoint, collider.transform.position);
-
-                if (distance < closestDistance)
-                {
-                    Managers.Game.TargetingSystem.Target = collider.gameObject;
-                    closestDistance = distance;
-                }
+                Managers.Game.TargetingSystem.Target = collider.gameObject;
+                closestDistance = distance;
             }
         }
+    
     }
 }

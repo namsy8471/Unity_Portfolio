@@ -54,14 +54,12 @@ public class InputManager
     #endregion
 
     private List<KeyCode> _wholeKeyList = new List<KeyCode>();
-    
-    public bool InputUpdateState { get; private set; }
 
     public void Init()
     {
         _inventoryKeyCode = KeyCode.I;
         _characterStatusKeyCode = KeyCode.C;
-        _skillWindowKeyCode = KeyCode.K;
+        _skillWindowKeyCode = KeyCode.Z;
         
         _inventoryItemRotateKeyCode = KeyCode.R;
         _postureChangeKeyCode = KeyCode.Space;
@@ -76,13 +74,10 @@ public class InputManager
         _targetingKeyCode = KeyCode.LeftControl;
         _skillQuitKeyCode = KeyCode.Escape;
 
-        InputUpdateState = true;
     }
 
     public void Update()
     {
-        if (InputUpdateState == false) return;
-        
         foreach (var keyCode in _keyButtonDown.Keys)
         {
             if (Input.GetKeyDown(keyCode))
@@ -226,15 +221,5 @@ public class InputManager
             default:
                 break;
         }
-    }
-
-    public void StopInputUpdate()
-    {
-        InputUpdateState = false;
-    }
-    
-    public void StartInputUpdate()
-    {
-        InputUpdateState = true;
     }
 }

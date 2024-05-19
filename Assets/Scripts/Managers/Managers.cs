@@ -38,8 +38,9 @@ public class Managers : MonoBehaviour
                 ManagersGo.AddComponent<Managers>();
             }
             
-            DontDestroyOnLoad(ManagersGo);
+            //DontDestroyOnLoad(ManagersGo);
             _instance = ManagersGo.GetComponent<Managers>();
+            Instantiate(Resources.Load<GameObject>("Prefabs/Player/Player"));
             
             Input.Init();
             Sound.Init();

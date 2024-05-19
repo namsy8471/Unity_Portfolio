@@ -4,126 +4,71 @@ using UnityEngine;
 
 public class EnemyGetDamageState : IStateBase
 {
-    private enum KnockDownState
-    {
-        GetDamage,
-        KnockDown
-    }
+
+    public float Timer { get; private set;}
     
-    private float timer;
-    private float getDelayTime;
-    private float downDelayTime;
+    private Animator _animator;
+    private EnemyController _controller;
 
-    [SerializeField]private bool isInvincible;
-    [SerializeField]private float downGauge;
-    private KnockDownState knockDownState;
+    public EnemyGetDamageState(GameObject go) => _controller = go.GetComponent<EnemyController>();
     
-    private Animator animator;
-    private Rigidbody rb;
-
-    private GameObject _controller;
-
-    public EnemyGetDamageState(GameObject go) => _controller = go;
     public void Init()
     {
-        animator = _controller.GetComponentInChildren<Animator>();
-        rb = _controller.GetComponent<Rigidbody>();
-        
-        downGauge = 0.0f;
-
-        getDelayTime = 0.8f;
-        downDelayTime = 2.6f;
+        _animator = _controller.GetComponentInChildren<Animator>();
     }
 
     public void StartState()
     {
         // Debug.Log("GetDamage State Start");
 
-        timer = 0;
+        Timer = 2;
         
-        animator.SetTrigger("Get Hit Front");
-        knockDownState = KnockDownState.GetDamage;
+        var pos = Managers.Game.Player.transform.position;
+        _controller.transform.LookAt(pos);
+
+        var player = Managers.Game.Player.GetComponent<PlayerController>();
+        var playerStatus = player.Status;
+        var playerSkill = player.CurrentSkill;
+
+        _controller.DownGauge += (playerSkill as AttackSkill)?.SkillDownGauge ?? playerStatus.DownGaugeToHit;
+        _controller.Status.Hp -= (Random.Range(playerStatus.MinDmg, playerStatus.MaxDmg + 1)
+                                  + ((playerSkill as AttackSkill)?.SkillDamage ?? 0))
+                                  * ((playerSkill as AttackSkill)?.SkillDamageRatio ?? 1);
+
+        if (playerSkill is CounterAttack)
+        {
+            _controller.DownGauge = 101;
+            _controller.Status.Hp -= Random.Range(_controller.Status.MinDmg, _controller.Status.MaxDmg + 1) * 1.5f;
+        }
+        
+        playerSkill?.StopSkill();
+        
+        
+        Debug.Log("적 DownGauge = " + _controller.DownGauge);
+        
+        if (_controller.DownGauge >= 100)
+        {
+            _controller.ChangeState(EnemyController.EnemyState.Down);
+            return;
+        }
+        
+        if (_controller.Status.Hp <= 0)
+        {
+            _controller.ChangeState(EnemyController.EnemyState.Dead);
+            return;
+        }
+
+        
+        _animator.SetTrigger("Get Hit Front");
     }
 
     public void UpdateState()
     {
-        // Debug.Log("GetDamage State Update");
-
-        timer += Time.deltaTime;
-        
-        switch (knockDownState)
-        {
-            case KnockDownState.GetDamage:
-                if (downGauge >= 100)
-                {
-                    ChnageState(KnockDownState.KnockDown);
-                    break;
-                }
-
-                if (timer >= getDelayTime)
-                {
-                    // gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
-                    break;
-                }
-                break;
-            case KnockDownState.KnockDown:
-                
-                if (timer >= downDelayTime)
-                {
-                    // gameObject.SendMessage("BackToIdle", SendMessageOptions.DontRequireReceiver);
-                    break;
-                }
-                break;
-            default:
-                break;
-        }
+        Timer -= Time.deltaTime;
     }
 
     public void EndState()
     {
-        // Debug.Log("GetDamage State End");
-        animator.SetBool("Stunned Loop", false);
-        isInvincible = false;
-        
-    }
-
-    private void ChnageState(KnockDownState state)
-    {
-        switch (knockDownState)
-        {
-            case KnockDownState.GetDamage:
-                break;
-            case KnockDownState.KnockDown:
-                break;
-            default:
-                break;
-        }
-        
-        knockDownState = state;
-
-        switch (knockDownState)
-        {
-            case KnockDownState.GetDamage:
-                break;
-            case KnockDownState.KnockDown:
-                timer = 0;
-                downGauge = 0;
-                animator.SetBool("Stunned Loop", true);
-                rb.AddForce(new Vector3(0, 1, -1) * 5.0f, ForceMode.Impulse);
-                isInvincible = true;
-                break;
-            default:
-                break;
-        }
-    }
-
-    public bool IsInvincible()
-    {
-        return isInvincible;
-    }
-
-    private void AddDownGauge(float value)
-    {
-        downGauge += value;
+        _animator.SetBool("Stunned Loop", false);
     }
 }
