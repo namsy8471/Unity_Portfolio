@@ -86,6 +86,8 @@ public class InventoryController
         }
         else
         {
+            if (!_selectedInventory.gameObject.activeSelf) return;
+            
             if (_selectedItem != null)
             {
                 PlaceItem(tileGridPosition);
@@ -106,14 +108,12 @@ public class InventoryController
             if (Input.GetMouseButton(0))
             {
                 _itemToLoot = Managers.Ray.RayHitCollider.transform.gameObject;
-                //Managers.Game.Player.GetComponent<PlayerController>().MoveState.DestPos = _itemToLoot.transform.position;
             }
             
             if (_itemToLoot == Managers.Ray.RayHitCollider.transform.gameObject && Vector3.Distance(Managers.Ray.RayHitPoint, Managers.Game.Player.transform.position) < 2.0f)
             {
                 LootingItem(Managers.Ray.RayHitCollider.transform.name);
                 Managers.Ray.RayHitCollider.transform.gameObject.SetActive(false);
-                // Object.Destroy(Managers.Ray.RayHitCollider.transform.gameObject);
             }
         }
     }
@@ -214,11 +214,16 @@ public class InventoryController
 
     private void PickUpItem(Vector2Int tileGridPosition)
     {
-        _selectedItem = _selectedInventory.PickUpItem(tileGridPosition.x, tileGridPosition.y);
-        _selectedItem.ItemData.PickUpItem();
+        if (tileGridPosition == new Vector2Int(-1, -1) ||
+            tileGridPosition.x > _selectedInventory.ItemGrid.gridSize.width ||
+            tileGridPosition.y > _selectedInventory.ItemGrid.gridSize.height) return;
         
-        if(_selectedItem != null)
-            _rectTransform = _selectedItem.GetComponent<RectTransform>();
+        _selectedItem = _selectedInventory.PickUpItem(tileGridPosition.x, tileGridPosition.y);
+
+        if (_selectedItem == null) return;
+        
+        _rectTransform = _selectedItem.GetComponent<RectTransform>();
+        _selectedItem?.ItemData.PickUpItem();
     }
 
     private void ItemDrag()

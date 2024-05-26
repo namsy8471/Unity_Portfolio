@@ -17,6 +17,12 @@ public class EnemyIdleState : IStateBase
     public void StartState()
     {
         _animator.SetBool("Idle", true);
+        
+        if (_controller.Status.Hp <= 0)
+        {
+            _controller.ChangeState(EnemyController.EnemyState.Dead);
+            return;
+        }
     }
 
     public void UpdateState()

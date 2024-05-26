@@ -27,6 +27,7 @@ public class EnemyDownState : IStateBase
         if (_controller.Status.Hp <= 0)
         {
             _controller.ChangeState(EnemyController.EnemyState.Dead);
+            return;
         }
     }
 

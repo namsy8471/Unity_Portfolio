@@ -24,4 +24,6 @@ public class Controller : MonoBehaviour
         if(HpBar.activeSelf) HpBar.transform.rotation = Camera.main.transform.rotation;
         if (InvincibleTimer >= 0) InvincibleTimer -= Time.deltaTime;
     }
+    
+    protected void PlaySound(string keyWord) => Managers.Sound.PlaySound(gameObject, keyWord);
 }

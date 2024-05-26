@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
@@ -14,12 +15,12 @@ public class ItemGrid
     }
     
     // 그리드(셀) 크기 (기본 20 X 10)
-    struct GridSize
+    public struct GridSize
     {
         public int width;
         public int height;
     }
-    private GridSize _gridSize;
+    public GridSize gridSize;
     
     private InventoryItem[,] _inventoryItemSlot;
     private RectTransform _rectTransform;
@@ -38,9 +39,9 @@ public class ItemGrid
     public void SetGrid(RectTransform rect, int width, int height)
     {
         _rectTransform = rect;
-        _gridSize.width = width;
-        _gridSize.height = height;
-        Init(_gridSize.width, _gridSize.height);
+        gridSize.width = width;
+        gridSize.height = height;
+        Init(gridSize.width, gridSize.height);
     }
     
     public Vector2Int GetTileGridPosition(Vector2 mousePos)
@@ -150,11 +151,12 @@ public class ItemGrid
         return true;
     }
 
+    [CanBeNull]
     public InventoryItem PickUpItem(int posX, int posY)
     {
-        var toReturn = _inventoryItemSlot[posX, posY];
+        var toReturn = _inventoryItemSlot[posX, posY] ? _inventoryItemSlot[posX, posY] : null;
 
-        if (!toReturn)
+        if (toReturn == null)
         {
             return null;
         }
@@ -177,9 +179,9 @@ public class ItemGrid
 
     bool PositionCheck(int posX, int posY)
     {
-        if (posX < 0 || posY < 0 || posX >= _gridSize.width || posY >= _gridSize.height)
+        if (posX < 0 || posY < 0 || posX >= gridSize.width || posY >= gridSize.height)
         {
-            Debug.Log("posX : "+ posX + " posY : " + posY + " GridSize.Width : " + _gridSize.width + " GridSize.Height : " + _gridSize.height );
+            Debug.Log("posX : "+ posX + " posY : " + posY + " GridSize.Width : " + gridSize.width + " GridSize.Height : " + gridSize.height );
             return false;
         }
         return true;
@@ -203,15 +205,16 @@ public class ItemGrid
         return true;
     }
 
+    [CanBeNull]
     public InventoryItem GetItem(int x, int y)
     {
-        return _inventoryItemSlot[x, y];
+        return _inventoryItemSlot[x, y] ? _inventoryItemSlot[x,y] : null;
     }
 
     public Vector2Int? FindSpaceForObject(InventoryItem itemToInsert)
     {
-        int height = _gridSize.height - itemToInsert.Height + 1;
-        int width = _gridSize.width - itemToInsert.Width + 1;
+        int height = gridSize.height - itemToInsert.Height + 1;
+        int width = gridSize.width - itemToInsert.Width + 1;
         
         for (int y = 0; y < height; y++)
         {

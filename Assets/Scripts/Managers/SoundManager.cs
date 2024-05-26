@@ -22,11 +22,18 @@ public class SoundManager
         for (int i = 1; i <= 10; i++) AddSoundFile("Walk/Walk");
         AddSoundFile("Sword/Sword");
         AddSoundFile("Punch/Punch");
+        AddSoundFile("BGM/BGM");
+
+        #region Enemy
+        AddSoundFile("Enemy/Bear/BearRoaring");
+        AddSoundFile("Enemy/Bear/BearDead");
+        AddSoundFile("Enemy/Bear/BearGetHit");
+        #endregion
     }
 
     private AudioClip AddSoundFile(string path)
     {
-        int index = path.IndexOf('/');
+        int index = path.LastIndexOf('/');
         string newPath = path.Substring(index + 1);
         
         if (_soundFiles.ContainsKey(newPath)) return _soundFiles[path];

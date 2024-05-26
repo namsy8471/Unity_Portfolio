@@ -10,15 +10,15 @@ public class RayManager
     // This Manager manages Ray. All functions needed to use ray needs to access this Manager.
     // 이 매니저는 레이를 관리합니다. 레이가 필요한 모든 기능은 이 매니저에 접근해야만 합니다.
 
-    private Collider _hitCollider;
     private Vector3 _hitPoint;
 
     private GameObject _currentGo;
     
     private LayerMask _layerMask;
     private const float SphereRadius = 50.0f; // 마우스 히트 포인트에서 타게팅이 가능한 범위
+
     
-    public Collider RayHitCollider => _hitCollider;
+    public Collider RayHitCollider { get; set; }
     public Vector3 RayHitPoint => _hitPoint;
 
     public Collider RayHitColliderByMouseClicked { get; set; }
@@ -50,13 +50,13 @@ public class RayManager
                 SaveHitInfoByMouse(hit);
             }
             
-            if (_hitCollider.gameObject.layer == LayerMask.NameToLayer("Enemy") ||
-                _hitCollider.gameObject.layer == LayerMask.NameToLayer("Player") ||
-                _hitCollider.gameObject == Managers.Game.TargetingSystem.Target)
+            if (RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Enemy") ||
+                RayHitCollider.gameObject.layer == LayerMask.NameToLayer("Player") ||
+                RayHitCollider.gameObject == Managers.Game.TargetingSystem.Target)
             {
-                if (_currentGo != _hitCollider.gameObject)
+                if (_currentGo != RayHitCollider.gameObject)
                 {
-                    _currentGo = _hitCollider.gameObject;
+                    _currentGo = RayHitCollider.gameObject;
                     _currentGo.GetComponent<Controller>().HpBar.SetActive(true);
                 }
             }
@@ -80,7 +80,7 @@ public class RayManager
 
     private void SaveHitInfo(RaycastHit hit)
     {
-        _hitCollider = hit.collider;
+        RayHitCollider = hit.collider;
         _hitPoint = hit.point;
     }
 

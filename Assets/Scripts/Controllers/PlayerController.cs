@@ -347,7 +347,7 @@ public class PlayerController : Controller
         ChangeState(PlayerState.GetDamage, enemyController);
     }
 
-    // Animation Event
+    #region Animation Event
     private void AttackToEnemy() => AttackState.Attack(CurrentEnemy);
 
     private void GetInvincibleTime()
@@ -356,5 +356,7 @@ public class PlayerController : Controller
         if(CurrentEnemy == null)
             CurrentEnemy = Managers.Game.TargetingSystem.Target.GetComponent<EnemyController>();
     }
-    private void PlaySound(string keyWord) => Managers.Sound.PlaySound(gameObject, keyWord);
+    //private void PlaySound(string keyWord) => Managers.Sound.PlaySound(gameObject, keyWord);
+    
+    #endregion
 }

@@ -32,6 +32,8 @@ public class EnemyDeadState : IStateBase
 
     public void EndState()
     {
-        
+        _controller.DieAction();
+        _controller.MakeItem();
+        _controller.gameObject.SetActive(false);
     }
 }

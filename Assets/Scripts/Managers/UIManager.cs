@@ -71,7 +71,7 @@ public class UIManager
         
         _inventories.Add(_mainInventory);
         
-        #region KeyBinding
+        #region Key and Action Binding
 
         _uiBackground.GetComponentInChildren<UI_InventoryButton>().CloseOrOpen = CloseOrOpenInventory;
         _inventoryUI.GetComponentInChildren<UI_InventoryButton>().CloseOrOpen = CloseOrOpenInventory;
@@ -84,6 +84,10 @@ public class UIManager
         _uiBackground.GetComponentInChildren<UI_SkillWindowButton>().CloseOrOpen = CloseOrOpenSkillWindow;
         _skillUI.GetComponentInChildren<UI_SkillWindowButton>().CloseOrOpen = CloseOrOpenSkillWindow;
         Managers.Input.AddAction(Managers.Input.KeyButtonDown, Managers.Input.SkillWindowKey, CloseOrOpenSkillWindow);
+        
+        _uiBackground.GetComponentInChildren<UI_MainMenuButton>().CloseOrOpen = CloseOrOpenMenu;
+        _uiBackground.GetComponentInChildren<UI_MainMenuButton>().transform.Find("MenuWindow/Background/GameQuitButton").
+            GetComponent<Button>().onClick.AddListener(Application.Quit);
         
         #endregion
         
@@ -127,9 +131,29 @@ public class UIManager
         _dieUI.gameObject.SetActive(true);
     }
 
+    public void WinCanvasActive()
+    {
+        DieCanvasActive();
+
+        _dieUI.gameObject.GetComponentInChildren<TextMeshProUGUI>().text = "Game Clear";
+        _dieUI.gameObject.GetComponentInChildren<Button>().onClick.RemoveListener(ResetGame);
+        _dieUI.gameObject.GetComponentInChildren<Button>().onClick.AddListener(BackToTitle);
+    }
+
     private void ResetGame()
     {
         SceneManager.LoadScene("GameScene");
+    }
+    
+    private void BackToTitle()
+    {
+        SceneManager.LoadScene("TitleScene");
+    }
+
+    private void CloseOrOpenMenu()
+    {
+        _uiBackground.GetComponentInChildren<UI_MainMenuButton>().transform.Find("MenuWindow").gameObject.SetActive(
+            !_uiBackground.GetComponentInChildren<UI_MainMenuButton>().transform.Find("MenuWindow").gameObject.activeSelf);
     }
     
     private void CloseOrOpenInventory()

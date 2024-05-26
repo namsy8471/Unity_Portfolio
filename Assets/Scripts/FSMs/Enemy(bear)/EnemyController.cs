@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Contents.Status;
+using Scenes;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -40,12 +41,9 @@ public class EnemyController : Controller
     private float _petrolTimer;
     
     public float DownGauge { get; set; }
-
-    //For Debug by Inspector
-    public float downGauge;
-    
     public Status Status { get; set; }
-
+    
+    public Action DieAction;
     void Start()
     {
         Animator = GetComponentInChildren<Animator>();
@@ -83,13 +81,13 @@ public class EnemyController : Controller
         _getDamageState.Init();
         _downState.Init();
         _deadState.Init();
+
+        DieAction = GameObject.Find("@Scene").GetComponent<GameScene>().EnemyKilled;
     }
 
     protected override void Update()
     {
         base.Update();
-
-        downGauge = DownGauge;
         
         switch (State)
         {
@@ -125,7 +123,7 @@ public class EnemyController : Controller
             
             case EnemyState.GetDamage:
                 
-                if (_getDamageState.Timer < 0)
+                if (_getDamageState.Timer <= 0)
                 {
                     ChangeState(EnemyState.Idle);
                     break;
@@ -147,7 +145,7 @@ public class EnemyController : Controller
 
                 if (_deadState.Timer <= 0)
                 {
-                    gameObject.SetActive(false);
+                    ChangeState(EnemyState.Idle);
                 }
                 
                 _deadState.UpdateState();
@@ -187,7 +185,48 @@ public class EnemyController : Controller
 
     private void OnDisable()
     {
-        Destroy(gameObject);
+        if (Managers.Game.TargetingSystem.Target == gameObject)
+        {
+            Managers.Game.TargetingSystem.Target = null;
+        }
+
+        if (Managers.Ray.RayHitCollider == gameObject.GetComponent<Collider>())
+        {
+            Managers.Ray.RayHitCollider = null;
+        }
+
+        if (Managers.Ray.RayHitColliderByMouseClicked == gameObject.GetComponent<Collider>())
+        {
+            Managers.Ray.RayHitColliderByMouseClicked = null;
+        }
+        
+        Destroy(gameObject, 1.0f);
+    }
+
+    public void MakeItem()
+    {
+        // 아이템 생성
+        string path = "";
+        
+        int rand = Random.Range(0, 3);
+        switch (rand)
+        {
+            case 0:
+                path = "Prefabs/Equipment/Weapon/LongSword";
+                break;
+            case 1:
+                path = "Prefabs/Equipment/Shield/Shield1/HighLevelShield";
+                break;
+            case 2:
+                path = "Prefabs/Equipment/Shield/Shield3/LowLevelShield";
+                break;
+        }
+
+        GameObject obj = Instantiate(Resources.Load<GameObject>(path), transform.position + Vector3.up * 0.2f, transform.rotation);
+        int startIndex = path.LastIndexOf('/') + 1;
+        string result = path.Substring(startIndex);
+
+        obj.name = result;
     }
 
     public void ChangeState(EnemyState state)
@@ -316,5 +355,10 @@ public class EnemyController : Controller
         }
     }
 
+    #region Animation Event
+
     public void Attack() => _attackState.Attack();
+    //private void PlaySound(string keyWord) => Managers.Sound.PlaySound(gameObject, keyWord);
+
+    #endregion
 }

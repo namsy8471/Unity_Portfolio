@@ -183,8 +183,8 @@ namespace Contents.Status
             Controller = go;
             
             MaxHp = 100;
-            MaxMp = 50;
-            MaxStamina = 50;
+            MaxMp = 12.5f;
+            MaxStamina = 100;
 
             Str = 20;
             Dex = 20;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Contents.Status;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.XR;
@@ -26,10 +27,10 @@ public class EnemyAttackState : IStateBase
     private int _maxAttackCount;
     private float _attackDownGauge;
 
-    private GameObject _controller;
+    private EnemyController _controller;
     public float Timer { get; private set; }
 
-    public EnemyAttackState(GameObject go) => _controller = go;
+    public EnemyAttackState(GameObject go) => _controller = go.GetComponent<EnemyController>();
     public void Init()
     {
         _animator = _controller.GetComponent<Animator>();
@@ -38,8 +39,13 @@ public class EnemyAttackState : IStateBase
 
     public void StartState()
     {
+        if (_controller.Status.Hp <= 0)
+        {
+            _controller.ChangeState(EnemyController.EnemyState.Dead);
+        }
+        
         _animator.Play("Attack" + Random.Range(1,5));
-        Timer = _animator.GetCurrentAnimatorStateInfo(0).length - 0.2f;
+        Timer = _animator.GetCurrentAnimatorStateInfo(0).length;
     }
 
     public void UpdateState()
@@ -59,7 +65,7 @@ public class EnemyAttackState : IStateBase
         
         _controller.transform.LookAt(pos);
         
-        _player.GetDamage(_controller.GetComponent<EnemyController>());
+        _player.GetDamage(_controller);
         
         if (_player.CurrentSkill is DefendSkill)
         {

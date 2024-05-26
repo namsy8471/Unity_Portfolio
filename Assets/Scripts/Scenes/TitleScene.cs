@@ -11,6 +11,12 @@ namespace Scenes
 
         void Update()
         {
+            if (Input.GetKey(KeyCode.Escape))
+            {
+                Application.Quit();
+                return;
+            }
+
             if (Input.anyKey)
                 SceneManager.LoadScene("GameScene");
             

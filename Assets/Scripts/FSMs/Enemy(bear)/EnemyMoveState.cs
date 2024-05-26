@@ -75,6 +75,12 @@ public class EnemyMoveState : IStateBase
         _patrolTimer = 0;
         _patrolDone = false;
         _randomPatrolTime = Random.Range(1, 4);
+        
+        if (_controller.Status.Hp <= 0)
+        {
+            _controller.ChangeState(EnemyController.EnemyState.Dead);
+            return;
+        }
     }
 
     public void UpdateState()

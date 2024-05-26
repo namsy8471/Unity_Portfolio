@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class InputManager
@@ -17,6 +18,8 @@ public class InputManager
     public Action RMBDown;
     public Action RMBPressed;
 
+    public Action WinDown;
+    
     #region KeyCodes and properties
 
     private KeyCode _inventoryKeyCode;
@@ -51,6 +54,15 @@ public class InputManager
     public KeyCode TargetingKey => _targetingKeyCode;
     public KeyCode SkillQuitKey => _skillQuitKeyCode;
     
+    
+    // Windows API constants for key codes
+    private const int VK_LWIN = 0x5B; // Left Windows key
+    private const int VK_RWIN = 0x5C; // Right Windows key
+    
+    // Import the GetAsyncKeyState function from user32.dll
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
+    
     #endregion
 
     private List<KeyCode> _wholeKeyList = new List<KeyCode>();
@@ -73,7 +85,6 @@ public class InputManager
 
         _targetingKeyCode = KeyCode.LeftControl;
         _skillQuitKeyCode = KeyCode.Escape;
-
     }
 
     public void Update()
@@ -121,6 +132,17 @@ public class InputManager
         {
             RMBPressed?.Invoke();
         }
+
+        if (IsWindowsKeyPressed())
+        {
+            WinDown?.Invoke();
+        }
+    }
+    
+    private bool IsWindowsKeyPressed()
+    {
+        // Check the state of both the left and right Windows keys
+        return (GetAsyncKeyState(VK_LWIN) & 0x8000) != 0 || (GetAsyncKeyState(VK_RWIN) & 0x8000) != 0;
     }
     
     public void AddAction(Dictionary<KeyCode, Action> dictionary, KeyCode key, Action action)
