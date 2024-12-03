@@ -19,3 +19,5 @@ Implemented Feature (Last update on 2024-05-26)
 3. Grid Inventory and Item / Equipment equipping(Instancing at the first time, and make Dictionary Container for managing by Object pooling), unequipping etc.
 4. Quest System by Uniny SendMessage and C# collection
 5. Game Managers is made by Observer pattern(For changing mouse cursor, sounds etc.)
+
+Video URL: https://www.youtube.com/watch?v=xcyLgep3kXs
