@@ -8,6 +8,8 @@
 4. Unity SendMessage와 C# Collection을 사용한 퀘스트 시스템
 5. 옵저버 패턴으로 게임 매니저 구현(마우스 커서 변경), 사운드 매니저 구현
 
+Video URL: https://www.youtube.com/watch?v=xcyLgep3kXs
+
 // In English
 
 It is copy practice of Mabinogi(Game in Nexon co.) in Unity
