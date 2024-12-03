@@ -1,6 +1,6 @@
 유니티로 제작한 마비노기 모작 작품입니다.
 
-구현된 기능 (최종 수정 2023-12-21)
+구현된 기능 (최종 수정 2024-05-26)
 
 1. 플레이어 및 적 FSM
 2. 플레이어 이동 / FreeLook 카메라를 이용한 3인칭 카메라 이동
@@ -12,7 +12,7 @@
 
 It is copy practice of Mabinogi(Game in Nexon co.) in Unity
 
-Implemented Feature (Last update on 2023-12-21)
+Implemented Feature (Last update on 2024-05-26)
 
 1. Player/Enemy FSM
 2. Player Moving / 3rd Person Cam by FreeLook Camera(Cinemachine)
