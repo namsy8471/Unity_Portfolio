@@ -1,5 +1,12 @@
 유니티로 제작한 마비노기 모작 작품입니다.
 
+![image](https://github.com/user-attachments/assets/ea3646b1-b3d9-47dd-a594-d310dda066c3)
+![image](https://github.com/user-attachments/assets/9f7c6941-374e-43c7-963b-997295ebfe3d)
+![image](https://github.com/user-attachments/assets/be5f8598-ace4-4877-a6f3-1bd6355a3b10)
+
+
+
+
 구현된 기능 (최종 수정 2024-05-26)
 
 1. 플레이어 Control, 적 AI을 FSM(State Pattern) 구현
