@@ -4,6 +4,7 @@
 ![image](https://github.com/user-attachments/assets/9f7c6941-374e-43c7-963b-997295ebfe3d)
 ![image](https://github.com/user-attachments/assets/be5f8598-ace4-4877-a6f3-1bd6355a3b10)
 
+개발인수: 1명
 
 기간: 4개월
 
@@ -24,6 +25,8 @@ Video URL: https://www.youtube.com/watch?v=xcyLgep3kXs
 // In English
 
 Recreated Mabinogi Project in Unity
+
+Development Personnel: 1 Person
 
 Duration: 4 months
 
@@ -47,6 +50,8 @@ Video URL: https://www.youtube.com/watch?v=xcyLgep3kXs
 // 日本語Ver.
 
 Unityで制作したマビノギ模倣作品
+
+開発人数: 1名
 
 機関：４ヶ月
 
