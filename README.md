@@ -6,6 +6,8 @@
 
 개발인수: 1명
 
+동작환경: Window 11
+
 기간: 4개월
 
 목표: 제일 오래했던 PC게임인 마비노기를 모작해보면서 전체적인 RPG게임의 시스템 설계 및 디자인 패턴 연습
@@ -27,6 +29,8 @@ Video URL: https://www.youtube.com/watch?v=xcyLgep3kXs
 Recreated Mabinogi Project in Unity
 
 Development Personnel: 1 Person
+
+Operation Enviroment：Windows 11
 
 Duration: 4 months
 
@@ -52,6 +56,8 @@ Video URL: https://www.youtube.com/watch?v=xcyLgep3kXs
 Unityで制作したマビノギ模倣作品
 
 開発人数: 1名
+
+動作環境：Windows 11
 
 機関：４ヶ月
 
