@@ -117,3 +117,5 @@ Unityで制作したマビノギ模倣作品
 マビノギのスキルシステムと戦闘システムです。このゲームは比較的マイナーであるため、既存の参考になる部分が少なく、自分で一から実装する必要がありました。そのため、多くの時間と労力をかけてスムーズで直感的なシステムを構築することを目指しました。
 
 Video URL: https://www.youtube.com/watch?v=xcyLgep3kXs
+
+実行ファイルは以下のリンクからダウンロードできます: https://drive.google.com/file/d/1l2EyKP8pFqGlTZ6mFsJGTs0biJued0EW/view?usp=sharing
