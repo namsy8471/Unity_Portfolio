@@ -39,7 +39,9 @@ English content is written below!
 마비노기의 스킬 시스템과 전투 시스템입니다. 이 게임은 비교적 마이너한 편이라 참고할 수 있는 기존 자료가 거의 없었고, 모든 것을 처음부터 구현해야 했습니다. 따라서 직관적이고 매끄러운 시스템을 구축하기 위해 많은 시간과 노력을 기울였습니다.
 
 
-Video URL: https://www.youtube.com/watch?v=xcyLgep3kXs
+Video URL: [https://www.youtube.com/watch?v=xcyLgep3kXs](https://youtu.be/wVfeVCnwdKM?si=m30MyUjkE9UUaZrQ
+)<img width="1055" height="81" alt="image" src="https://github.com/user-attachments/assets/2eaefa0a-e386-41d4-806f-a294a1843296" />
+
 
 // In English
 
@@ -78,7 +80,9 @@ Q: What points do you want us to particularly focus on in your program?
 
 The skill system and combat system of Mabinogi. Since this game is relatively niche, there were few existing references, requiring me to implement everything from scratch. Therefore, I devoted considerable time and effort to building a smooth and intuitive system.
 
-Video URL: https://www.youtube.com/watch?v=xcyLgep3kXs
+Video URL: [https://www.youtube.com/watch?v=xcyLgep3kXs](https://youtu.be/wVfeVCnwdKM?si=m30MyUjkE9UUaZrQ
+)<img width="1055" height="81" alt="image" src="https://github.com/user-attachments/assets/c92a5fff-6b37-413c-bc62-211f2e6f9faa" />
+
 
 // 日本語Ver.
 
@@ -117,6 +121,8 @@ Unityで制作したマビノギ模倣作品
 
 マビノギのスキルシステムと戦闘システムです。このゲームは比較的マイナーであるため、既存の参考になる部分が少なく、自分で一から実装する必要がありました。そのため、多くの時間と労力をかけてスムーズで直感的なシステムを構築することを目指しました。
 
-Video URL: https://www.youtube.com/watch?v=xcyLgep3kXs
+Video URL: [https://www.youtube.com/watch?v=xcyLgep3kXs](https://youtu.be/wVfeVCnwdKM?si=m30MyUjkE9UUaZrQ
+)<img width="1055" height="81" alt="image" src="https://github.com/user-attachments/assets/cea9facf-4229-43ac-ae95-ed572e8ab485" />
+
 
 実行ファイルは以下のリンクからダウンロードできます: https://drive.google.com/file/d/1l2EyKP8pFqGlTZ6mFsJGTs0biJued0EW/view?usp=sharing
