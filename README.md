@@ -34,17 +34,26 @@ A fan recreation of the MMORPG **Mabinogi**, built from scratch in Unity.
 ---
 
 ## 구현 기능 / 実装された機能 / Implemented Features
+
 1. **플레이어 조작 및 적 AI / プレイヤー操作と敵AI / Player & Enemy FSM**  
-　→ FSM(State Pattern)을 사용해 상태 기반 행동 전환 구현  
+→ FSM(State Pattern)을 사용해 상태 기반 행동 전환 구현  
+→ FSM（ステートパターン）を使用し、状態に応じて行動を切り替えるシステムを実装。  
+→ Implemented **state-based behavior transitions** using the **FSM (State Pattern)**.  
 
 2. **그리드 인벤토리 시스템 / グリッドインベントリシステム / Grid Inventory System**  
-　→ 아이템 및 장비 착용/해제 구현 (최초 착용 시 객체화 후 Dictionary 기반 오브젝트 풀링 관리)  
+→ 아이템 및 장비 착용/해제 구현 (최초 착용 시 객체화 후 Dictionary 기반 오브젝트 풀링 관리)  
+→ アイテムや装備の装着・解除機能を実装。初回装着時にオブジェクト化し、以降は **Dictionary ベースのオブジェクトプーリング** により管理。  
+→ Implemented item/equipment **equip and unequip** functions, instantiating objects once and managing them through **Dictionary-based object pooling**.  
 
 3. **플레이어 스킬 / プレイヤースキル / Player Skills**  
-　→ Smash, Defence, CounterAttack 스킬 구현  
+→ Smash, Defence, CounterAttack 스킬 구현  
+→ 「Smash」「Defence」「CounterAttack」などのスキルを実装し、アニメーションおよび戦闘連携を再現。  
+→ Implemented **Smash**, **Defence**, and **CounterAttack** skills with proper animation and combat linking.  
 
 4. **옵저버 패턴 기반 매니저 / オブザーバーパターンのマネージャー / Observer Pattern Managers**  
-　→ 마우스 커서 변경을 담당하는 Game Manager, 사운드를 제어하는 Sound Manager 구현  
+→ 마우스 커서 변경을 담당하는 Game Manager, 사운드를 제어하는 Sound Manager 구현  
+→ マウスカーソルの切り替えを管理する **Game Manager**、サウンドおよびBGMを制御する **Sound Manager** を構築。  
+→ Built **Game Manager** (handles mouse cursor transitions) and **Sound Manager** (controls sound & BGM) using the **Observer Pattern**.  
 
 ---
 
