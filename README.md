@@ -122,7 +122,7 @@ Initially, I misused the FSM structure due to a lack of understanding of design 
 
 ## 공들인 부분 / 力を入れた部分 / Points of Emphasis
 
-### 1️⃣ 스킬 및 전투 시스템 구현 / スキル・戦闘システムの実装 / Skill & Combat System Implementation
+### 1. 스킬 및 전투 시스템 구현 / スキル・戦闘システムの実装 / Skill & Combat System Implementation
 
 마비노기의 **스킬 및 전투 시스템**을 가장 중점적으로 구현했습니다.  
 기존 참고 자료가 거의 없어 **직접 설계·제작**했습니다.  
@@ -141,7 +141,7 @@ to create a **smooth and intuitive combat experience**.
 
 ---
 
-### 2️⃣ 입력 관리(Input Manager) 시스템의 설계 / Input Manager システムの設計 / Input Manager System Design
+### 2️. 입력 관리(Input Manager) 시스템의 설계 / Input Manager システムの設計 / Input Manager System Design
 
 입력 관리(**Input Manager**) 시스템의 설계에 주력했습니다.  
 클래스마다 개별적으로 `if (Input.GetKeyDown(...))` 조건을 작성하지 않고,  
