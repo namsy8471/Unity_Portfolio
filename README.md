@@ -59,7 +59,6 @@ Various Managers and Subsystems within the Game System
 
 ---
 
-### 🇰🇷 한국어
 #### 기본 조작
 - **이동**: 마우스 또는 **W / A / S / D** 키  
 - **공격**: 적을 **왼쪽 마우스 클릭** 시 공격  
@@ -75,9 +74,6 @@ Various Managers and Subsystems within the Game System
 - **왼쪽 클릭**: 해당 스킬 사용  
 - **오른쪽 클릭**: 슬롯에서 스킬 제거  
 
----
-
-### 日本語
 #### 基本操作
 - **移動**：マウス または **W / A / S / D** キー  
 - **攻撃**：敵を **左クリック** すると攻撃できます  
@@ -93,9 +89,6 @@ Various Managers and Subsystems within the Game System
 - **左クリック**：指定されたスキルを使用  
 - **右クリック**：ボックスからスキルを削除  
 
----
-
-### 🇺🇸 English
 #### Basic Controls
 - **Move**: Mouse or **W / A / S / D** keys  
 - **Attack**: **Left-click** on an enemy to attack  
@@ -128,9 +121,50 @@ Initially, I misused the FSM structure due to a lack of understanding of design 
 ---
 
 ## 공들인 부분 / 力を入れた部分 / Points of Emphasis
-마비노기의 **스킬 및 전투 시스템**을 가장 중점적으로 구현했습니다. 기존 참고 자료가 거의 없어 **직접 설계·제작**했습니다.  
-マビノギの**スキルシステムと戦闘システム**に最も力を入れました。参考資料が少なかったため、すべてを**自分で設計・実装**しました。  
-The **skill and combat systems** were my main focus. Since there were few existing references, I **implemented everything from scratch** to create a smooth and intuitive gameplay experience.
+
+### 1️⃣ 스킬 및 전투 시스템 구현 / スキル・戦闘システムの実装 / Skill & Combat System Implementation
+
+마비노기의 **스킬 및 전투 시스템**을 가장 중점적으로 구현했습니다.  
+기존 참고 자료가 거의 없어 **직접 설계·제작**했습니다.  
+스킬 간의 상호작용, 충돌 판정, 타이밍 처리 등을 세밀하게 조정하여  
+**직관적이고 부드러운 전투 시스템**을 구현하는 데 주력했습니다.  
+
+マビノギの**スキルシステムと戦闘システム**に最も力を入れました。  
+参考資料が少なかったため、すべてを**自分で設計・実装**しました。  
+スキル間の連携、当たり判定、タイミング処理などを丁寧に調整し、  
+**直感的でスムーズな戦闘システム**を実現しました。  
+
+The **skill and combat systems** were my main focus.  
+Since there were few existing references, I **implemented everything from scratch**.  
+I carefully tuned skill interactions, hit detection, and timing logic  
+to create a **smooth and intuitive combat experience**.  
+
+---
+
+### 2️⃣ 입력 관리(Input Manager) 시스템의 설계 / Input Manager システムの設計 / Input Manager System Design
+
+입력 관리(**Input Manager**) 시스템의 설계에 주력했습니다.  
+클래스마다 개별적으로 `if (Input.GetKeyDown(...))` 조건을 작성하지 않고,  
+**이벤트 구독형 입력 처리(Event-driven Input Handling)** 방식을 설계했습니다.  
+`Input Manager`가 키 입력을 중앙에서 감지하고,  
+해당 이벤트를 구독한 클래스에 전달하도록 구현했습니다.  
+이 방식으로 각 클래스의 입력 로직이 단순해지고,  
+코드의 **유지보수성**(Maintainability)과 **확장성**(Scalability)이 크게 향상되었습니다.  
+
+**Input Manager システムの設計に力を入れました。**  
+各クラスごとに `if (Input.GetKeyDown(...))` を記述するのではなく、  
+**イベント購読型の入力管理方式** を設計しました。  
+`Input Manager` が入力を一元的に検知し、購読しているクラスにイベントを通知する仕組みを実装しました。  
+この方法により、クラスごとの重複コードを削減し、  
+コードの **保守性（メンテナンス性）** と **拡張性** を大幅に向上させました。  
+
+I focused on designing the **Input Manager system**.  
+Instead of writing individual `if (Input.GetKeyDown(...))` checks inside each class,  
+I implemented an **event-driven input management system**.  
+The `Input Manager` centrally detects key inputs and triggers events subscribed by relevant classes.  
+This approach simplified input logic in each class and significantly improved  
+the overall **maintainability** and **scalability** of the project.  
+
 
 ---
 
