@@ -5,7 +5,7 @@ A fan recreation of the MMORPG **Mabinogi**, built from scratch in Unity.
 
 ---
 
-## Preview / プレビュー / 미리보기
+## 미리보기 / プレビュー / Preview
 **Video URL (日本語説明付き)**  
 [▶ https://www.youtube.com/watch?v=wVfeVCnwdKM](https://youtu.be/wVfeVCnwdKM?si=m30MyUjkE9UUaZrQ)
 
@@ -80,7 +80,7 @@ Various Managers and Subsystems within the Game System
 
 ---
 
-## 操作方法 / 조작법 / Controls
+## 조작법 / 操作方法 / Controls
 
 ---
 
@@ -194,11 +194,11 @@ the overall **maintainability** and **scalability** of the project.
 ---
 
 ## 실행 파일 / 実行ファイル / Executable
-[Download from Google Drive](https://drive.google.com/file/d/1l2EyKP8pFqGlTZ6mFsJGTs0biJued0EW/view?usp=sharing)
+link: https://drive.google.com/file/d/1_4GDz1bjWsPTDqZaba_qnxX-vgrB0fOF/view?usp=drive_link
 
 ---
 
-## Summary / まとめ / 요약
+## 요약 / まとめ / Summary
 이 프로젝트를 통해 FSM, 옵저버, 오브젝트 풀링 등 **RPG 핵심 패턴**을 직접 설계하며 실무적인 설계 감각을 익혔습니다.  
 FSM、オブザーバー、オブジェクトプーリングなどの**RPGの基本パターン**を設計・実装し、実践的な設計力を養いました。  
 This project deepened my understanding of **RPG design patterns** like FSM, Observer, and Object Pooling, while improving my hands-on design intuition.
