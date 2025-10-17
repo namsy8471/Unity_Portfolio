@@ -55,6 +55,64 @@ Various Managers and Subsystems within the Game System
 
 ---
 
+## 操作方法 / 조작법 / Controls
+
+---
+
+### 🇰🇷 한국어
+#### 기본 조작
+- **이동**: 마우스 또는 **W / A / S / D** 키  
+- **공격**: 적을 **왼쪽 마우스 클릭** 시 공격  
+- **타게팅**: **왼쪽 Ctrl 키**로 적 선택 가능  
+
+#### 화면 및 UI
+- **스킬 창 열기**: **Z**  
+- **스테이터스 창 열기**: **C**  
+- **인벤토리 열기**: **I**
+
+#### 상단 단축 슬롯 (Hotbar)
+- 각 슬롯은 **F1 ~ F12** 키에 대응  
+- **왼쪽 클릭**: 해당 스킬 사용  
+- **오른쪽 클릭**: 슬롯에서 스킬 제거  
+
+---
+
+### 日本語
+#### 基本操作
+- **移動**：マウス または **W / A / S / D** キー  
+- **攻撃**：敵を **左クリック** すると攻撃できます  
+- **ターゲティング**：**左Ctrl** キーを押すと敵をターゲットできます  
+
+#### 画面・UI操作
+- **スキル画面を開く**：**Z**  
+- **ステータス画面を開く**：**C**  
+- **インベントリを開く**：**I**
+
+#### ホットバー（画面上部の四角いボックス）
+- 各ボックスは **F1〜F12** キーに対応しています  
+- **左クリック**：指定されたスキルを使用  
+- **右クリック**：ボックスからスキルを削除  
+
+---
+
+### 🇺🇸 English
+#### Basic Controls
+- **Move**: Mouse or **W / A / S / D** keys  
+- **Attack**: **Left-click** on an enemy to attack  
+- **Targeting**: Hold **Left Ctrl** to target enemies  
+
+#### UI & Screens
+- **Open Skill Window**: **Z**  
+- **Open Status Window**: **C**  
+- **Open Inventory**: **I**
+
+#### Hotbar (Top Square Slots)
+- Each slot corresponds to **F1–F12** keys  
+- **Left-click**: Use the assigned skill  
+- **Right-click**: Remove the skill from the slot  
+
+---
+
 ## 내가 신경 쓴 부분 / 一番注意した事 / What I Focused On
 프로그램 작성 시 각 **계층 구조를 준수**하려고 노력했습니다. 이를 통해 코드의 가독성과 수정·확장 효율성을 높였습니다.  
 各階層構造を可能な限り守ることを意識し、可読性と拡張性を高めました。  
