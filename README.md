@@ -51,9 +51,25 @@ A fan recreation of the MMORPG **Mabinogi**, built from scratch in Unity.
 → Implemented **Smash**, **Defence**, and **CounterAttack** skills with proper animation and combat linking.  
 
 4. **옵저버 패턴 기반 매니저 / オブザーバーパターンのマネージャー / Observer Pattern Managers**  
-→ 마우스 커서 변경을 담당하는 Game Manager, 사운드를 제어하는 Sound Manager 구현  
-→ マウスカーソルの切り替えを管理する **Game Manager**、サウンドおよびBGMを制御する **Sound Manager** を構築。  
-→ Built **Game Manager** (handles mouse cursor transitions) and **Sound Manager** (controls sound & BGM) using the **Observer Pattern**.  
+  → **마우스 커서 변경을 담당하는 Game Manager**, **사운드를 제어하는 Sound Manager**,  
+  **키보드·마우스 입력 이벤트를 제어하는 Input Manager**,  
+  그리고 **한 번 습득한 장비를 풀링 관리하는 Pooling Manager** 등을 구현했습니다.  
+  이 모든 매니저는 상호 독립적으로 동작하면서도, 옵저버 패턴을 통해 유기적으로 연결되어  
+  시스템 전체의 유지보수성과 확장성을 높였습니다.  
+
+　→ **マウスカーソルの切り替えを管理する Game Manager**、**サウンドとBGMを制御する Sound Manager**、  
+　　**キーボードとマウスの入力イベントを統括する Input Manager**、  
+　　そして **一度取得した装備をプーリングで管理する Pooling Manager** などを実装しました。  
+　　これらのマネージャーはそれぞれ独立して動作しながら、オブザーバーパターンを介して連携し、  
+　　システム全体の保守性と拡張性を向上させました。  
+
+　→ Implemented the **Game Manager** (handles mouse cursor transitions),  
+　　**Sound Manager** (controls sound and BGM),  
+　　**Input Manager** (manages keyboard and mouse input events),  
+　　and **Pooling Manager** (manages already-acquired equipment through pooling).  
+　　Each manager operates independently yet communicates organically via the **Observer Pattern**,  
+　　enhancing the overall **maintainability** and **scalability** of the system.
+
 
 ---
 
