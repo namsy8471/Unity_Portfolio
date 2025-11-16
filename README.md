@@ -6,8 +6,10 @@ A fan recreation of the MMORPG **Mabinogi**, built from scratch in Unity.
 ---
 
 ## 미리보기 / プレビュー / Preview
-**Video URL (日本語説明付き)**  
-[▶ https://www.youtube.com/watch?v=wVfeVCnwdKM](https://youtu.be/wVfeVCnwdKM?si=m30MyUjkE9UUaZrQ)
+**Video URL (한국어 자막 및 설명)**  
+https://youtu.be/HeBwtzQzYa8  
+**Video URL (日本語説明付き)**   
+https://youtu.be/wVfeVCnwdKM?si=m30MyUjkE9UUaZrQ
 
 ## In-Game Screenshots / ゲーム内スクリーンショット  
 
